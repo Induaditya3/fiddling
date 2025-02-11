@@ -145,4 +145,4 @@ We can check which shared libraries are loaded at runtime by running
 ```bash
 ldd ./prog
 ```
-We might wonder how does the compiler know where to look for those *.so* (dynamic libraries which are loaded at runtime). Actually location for those libraries are stored in special **PATH** variable of linux (analgous environment variable exist in Windows). It many addresses separated by colon **:** .
+We might wonder how does the compiler know where to look for those *.so* (dynamic libraries which are loaded at runtime). Actually location for those libraries are stored in special **PATH** variable of linux (analgous environment variable exist in Windows). It stores many addresses separated by colon **:** .
