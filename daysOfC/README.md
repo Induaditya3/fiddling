@@ -144,3 +144,20 @@ int main(){
 	return 0;
 }
 ```
+
+## Header files
+
+Header files *.h* are like interface of OCaml contained in *.mli* . Those files only contain function prototypes, global variable declarations and user defined data types.
+It acts as a reference for available data structures and functions.
+
+As opposed to header files, source files *.c* only contain program logic and implementation of algorithms.
+
+## Keywords
+
+`const` in front of avriable means that that variable cannot be modified after first assignment.
+
+`#include "library_name"` means that *library_name* is written by us and compiler should look for it in the current directory (or we full realtive or absolute path). As opposed to `#include <library_name>` which is generally found in location specified in system **PATH** variable.
+
+## Precautions
+
+Never return a pointer created inside a function. Returning local variable is fine.
