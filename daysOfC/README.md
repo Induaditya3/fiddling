@@ -15,6 +15,7 @@ int main(){
     printf("%d\n",x);
 }
 ```
+Another thing to keep in mind is that as soon program comes out of some block, variables declared inside that block (or block scope) is reclaimed, meaning that memory taken up by variables in that block can be resused for storing other stuffs (variables, arrays, structs as needed).
 
 ## Assert
 
@@ -145,6 +146,76 @@ int main(){
 }
 ```
 
+## User defined data types
+
+For example a vector with x component and y component can be defined as
+
+```C
+typedef struct vector
+{
+    float x;
+    float y;
+}vector_h;
+```
+Here struct is actually defining the type and typedef is reanaming it so we can refer to it by `vector_h` instead of `struct vector`.
+
+## Stack based memory
+
+It is working memory which is used to store temporary stuffs like local variables, from where the function was called and with what arguments, etc. These make up a *stack frame*.
+A running program (called a process) uses this kind of memory and this is provided by *RAM*. When a process ends the memory is reclaimed by *os*. If this kind of memory is used to its full capacity then this is known as **stack overflow**.
+
+*os* generally divides a process into 
+- source code
+- stack
+- heap
+- ...
+
+Stack itself is implemented using data structure called **stack**. It has two basic actions : adding things (called **pushing** onto stack) and removing things which were last added (called **poping** off the stack). It exhibits **LIFO** (*Last In First Out*). 
+
+For example 
+```c
+void foo(int x){
+    int a = 1;
+    int b = 2;
+}
+
+int main(){
+    for(int i = 0; i < 9999999; i++){
+        foo(i);
+    }
+}
+```
+Here each time a `foo` is called local variables `a` and `b` is added to stack and then removed. Then in the next iteration of loop, it is again pushed and then popped. And this goes on until the last iteration. Obviously, there is no *stack overflow* because memory is recalimed every time.
+## Heap memory
+
+It is large storage, long-lived and fully controlled by programmer. Whenever we use `malloc`, `realloc`, `calloc`, `free` , we are performing actions on this memory.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int* allocateHeapData(int size){
+    int* array = (int*)malloc(sizeof(int)*size);
+    printf("Address of array located in heap %p\n",array);
+    printf("Address of local variable array in stack %p\n",&array);
+    for (int i = 0; i < size; i++){
+        array[i]=i;
+    }
+    return array;
+}
+int main(){
+    int* heapData = allocateHeapData(100);
+    printf("Address of heapData located in heap %p\n",heapData);
+    printf("Address of local variable heapData in stack %p\n",&heapData);
+    for(int i = 0; i < 100; i++){
+        printf("%d\n",heapData[i]);
+    }
+    free(heapData);
+    return 0;
+}
+```
+This illustrates that we can allocate memory inside some function and access it inside other function (*main* in this case) because memory is not automatically freed unless we do it ourselves, which we do by calling `free(heapData)`. Note also that address stored in `heapData` and in `array` is same but address of each local variables are different but quite similar, because stack allocates memory one after another.
+
 ## Header files
 
 Header files *.h* are like interface of OCaml contained in *.mli* . Those files only contain function prototypes, global variable declarations and user defined data types.
@@ -157,6 +228,10 @@ As opposed to header files, source files *.c* only contain program logic and imp
 `const` in front of avriable means that that variable cannot be modified after first assignment.
 
 `#include "library_name"` means that *library_name* is written by us and compiler should look for it in the current directory (or we full realtive or absolute path). As opposed to `#include <library_name>` which is generally found in location specified in system **PATH** variable.
+
+`void` is lack of value and used to denote function having side effects and no return type much like *unit* of OCaml. It is also denote lack of argument in a function.
+
+`void*` is pointer which can cast into any data type but needs to be done explicitly. For example `malloc` and similar functions have `void*` return type.
 
 ## Precautions
 
