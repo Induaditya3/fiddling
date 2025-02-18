@@ -36,16 +36,18 @@
 \headcommand {\slideentry {3}{3}{1}{9/9}{Valid PMFs}{0}}
 \headcommand {\beamer@framepages {9}{9}}
 \headcommand {\beamer@subsectionpages {9}{9}}
-\headcommand {\beamer@subsectionentry {0}{3}{4}{10}{Binomial Distribution}}
-\headcommand {\slideentry {3}{4}{1}{10/10}{Binomial Distribution}{0}}
+\headcommand {\beamer@subsectionentry {0}{3}{4}{10}{Bernoulli Distribution}}
+\headcommand {\slideentry {3}{4}{1}{10/10}{Bernoulli Distribution}{0}}
 \headcommand {\beamer@framepages {10}{10}}
-\headcommand {\beamer@sectionpages {6}{10}}
-\headcommand {\beamer@subsectionpages {10}{10}}
-\headcommand {\sectionentry {4}{References}{11}{References}{0}}
-\headcommand {\slideentry {4}{0}{1}{11/11}{}{0}}
+\headcommand {\slideentry {3}{4}{2}{11/11}{Bernoulli Distribution}{0}}
 \headcommand {\beamer@framepages {11}{11}}
-\headcommand {\beamer@partpages {1}{11}}
-\headcommand {\beamer@subsectionpages {11}{11}}
-\headcommand {\beamer@sectionpages {11}{11}}
-\headcommand {\beamer@documentpages {11}}
-\headcommand {\gdef \inserttotalframenumber {11}}
+\headcommand {\beamer@sectionpages {6}{11}}
+\headcommand {\beamer@subsectionpages {10}{11}}
+\headcommand {\sectionentry {4}{References}{12}{References}{0}}
+\headcommand {\slideentry {4}{0}{1}{12/12}{}{0}}
+\headcommand {\beamer@framepages {12}{12}}
+\headcommand {\beamer@partpages {1}{12}}
+\headcommand {\beamer@subsectionpages {12}{12}}
+\headcommand {\beamer@sectionpages {12}{12}}
+\headcommand {\beamer@documentpages {12}}
+\headcommand {\gdef \inserttotalframenumber {12}}

@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1739813537.99836 "/home/induaditya/tex/math/ppt.tex" "ppt.pdf" "ppt" 1739813540.50913 0
+["pdflatex"] 1739844429.54243 "/home/induaditya/cp/fiddling/math/ppt.tex" "ppt.pdf" "ppt" 1739844432.113 0
   "/etc/texmf/web2c/texmf.cnf" 1736784510.17205 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/induaditya/tex/math/ppt.tex" 1739813535.54829 5065 bfcced8f30d0ed4b5a8b0161b77bd199 ""
+  "/home/induaditya/cp/fiddling/math/ppt.tex" 1739844427.66151 5495 78ba750a7feef8635f00c1c633517185 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -194,12 +194,13 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1736784521.5728 128028 f533b797fba58d231669ea19e894e23e ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1736784539 6800795 007951b9b4ebeee86555b29bc5731021 ""
+  "bern.png" 1739844060.99978 4246 9ccd2e24b9be95d57087762bd86eac11 ""
   "pmf.png" 1739735174.95654 15791 a64c0c456fbf28ef5849ba2ef6f85a5a ""
-  "ppt.aux" 1739813540.39509 4584 070dfc5b57986408f14bc4469b80d17b "pdflatex"
-  "ppt.nav" 1739813540.39709 2728 465a5690836b591893ae872233f143e4 "pdflatex"
-  "ppt.out" 1739813540.39709 1552 691f31192ac0837a8454cb7454bed77e "pdflatex"
-  "ppt.tex" 1739813535.54829 5065 bfcced8f30d0ed4b5a8b0161b77bd199 ""
-  "ppt.toc" 1739813540.39709 595 27f5dcb3d3fa2887bf98421f1e4267bf "pdflatex"
+  "ppt.aux" 1739844431.97754 4737 3a31a7e7270ad7071c14a0662c91a0be "pdflatex"
+  "ppt.nav" 1739844431.97954 2844 046b7b2d7abc8a6188d362db2f64dfc6 "pdflatex"
+  "ppt.out" 1739844431.97954 1557 453741cc316d5214214a6b99ed3f14ab "pdflatex"
+  "ppt.tex" 1739844427.66151 5495 78ba750a7feef8635f00c1c633517185 ""
+  "ppt.toc" 1739844431.97954 596 4008eb30f467c341dfd94a3b421d7356 "pdflatex"
   "randomvariable.png" 1739731049.97449 58551 c63d9a52d6cd945c3afef49e46ccd783 ""
   (generated)
   "ppt.aux"

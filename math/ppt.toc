@@ -6,5 +6,5 @@
 \beamer@subsectionintoc {3}{1}{Probability Mass Function}{6}{0}{3}
 \beamer@subsectionintoc {3}{2}{Example of PMF}{7}{0}{3}
 \beamer@subsectionintoc {3}{3}{Valid PMFs}{9}{0}{3}
-\beamer@subsectionintoc {3}{4}{Binomial Distribution}{10}{0}{3}
-\beamer@sectionintoc {4}{References}{11}{0}{4}
+\beamer@subsectionintoc {3}{4}{Bernoulli Distribution}{10}{0}{3}
+\beamer@sectionintoc {4}{References}{12}{0}{4}

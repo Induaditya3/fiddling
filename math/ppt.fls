@@ -1,9 +1,9 @@
-PWD /home/induaditya/tex/math
+PWD /home/induaditya/cp/fiddling/math
 INPUT /etc/texmf/web2c/texmf.cnf
 INPUT /usr/share/texmf/web2c/texmf.cnf
 INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT /home/induaditya/tex/math/ppt.tex
+INPUT /home/induaditya/cp/fiddling/math/ppt.tex
 OUTPUT ppt.log
 INPUT /usr/share/texlive/texmf-dist/tex/latex/beamer/beamer.cls
 INPUT /usr/share/texlive/texmf-dist/tex/latex/beamer/beamer.cls
@@ -360,6 +360,11 @@ INPUT ./pmf.png
 INPUT ./pmf.png
 INPUT ./pmf.png
 INPUT ./pmf.png
+INPUT ./bern.png
+INPUT ./bern.png
+INPUT ./bern.png
+INPUT ./bern.png
+INPUT ./bern.png
 OUTPUT ppt.nav
 OUTPUT ppt.toc
 OUTPUT ppt.snm
