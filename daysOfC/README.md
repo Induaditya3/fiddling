@@ -50,6 +50,69 @@ Aborted (core dumped)
 ```
 (Due to base case of our recursive function this will also terminate if we do not use **assert** )
 
+## C-strings
+
+There is no built-in data type for representing strings like other modern languages.
+
+In C, strings are modeled as array of characters. Null character `'\0'` marks the end of a string, sometimes also called Null terminator.
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(){
+    char arr[5] = {'h','e', 'l', 'l','o'};
+
+    char HELLO[6] = {'H','E', 'L', 'L','O','\0'};
+
+    printf("arr     %s = %ld\n",arr,strlen(arr));
+}
+```
+Output
+
+```bash
+arr     helloHELLO = 10
+```
+
+Clearly, we are not printing `HELLO`, but it is getting printed. This illustrates two things:
+
+1. `arr` and `HELLO` are stored contiguously in memory.
+2. `printf` and `strlen` thinks string has ended only when it encounters `\0`
+
+As C-strings are array of characters so it is mutable, unlike other languages. For example
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(){
+    char arr[4];
+    arr[0] = 'R';
+    arr[1] = 'a';
+    arr[2] = 'j';
+    arr[3] = '\0';
+
+    printf("%s\n",arr);
+
+    arr[0] = 'T';
+    arr[1] = 'a';
+    arr[2] = 'j';
+
+    printf("%s\n",arr);
+}
+```
+
+Output
+
+```bash
+Raj
+Taj
+```
+
+There is another thing called *string literal* (aka string constant) which is created by declaring char* variable and assigning it string. As the name suggests they are immutable. For eaxmple
+
+`char* name = "Raj";`
+
+Here null character is automatically added. 
 ## Pointers
 
 It stores the memory address of variable or other data structures.
@@ -241,13 +304,15 @@ As opposed to header files, source files *.c* only contain program logic and imp
 
 ## Keywords
 
-`const` in front of avriable means that that variable cannot be modified after first assignment.
+`const` in front of avriable means that that variable cannot be modified after first assignment. It makes a variable read-only.
 
 `#include "library_name"` means that *library_name* is written by us and compiler should look for it in the current directory (or we full realtive or absolute path). As opposed to `#include <library_name>` which is generally found in location specified in system **PATH** variable.
 
 `void` is lack of value and used to denote function having side effects and no return type much like *unit* of OCaml. It is also denote lack of argument in a function.
 
 `void*` is pointer which can cast into any data type but needs to be done explicitly. For example `malloc` and similar functions have `void*` return type.
+
+`size_t` is data type for long unsigned int. It signals variable that we declare using this type stores size of something.
 
 ## Precautions
 

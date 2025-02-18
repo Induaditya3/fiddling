@@ -1,0 +1,10 @@
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@subsectionintoc {1}{1}{Random Variable}{3}{0}{1}
+\beamer@subsectionintoc {1}{2}{Types of Random Variable}{3}{0}{1}
+\beamer@sectionintoc {2}{Example of Discrete Random Variable}{4}{0}{2}
+\beamer@sectionintoc {3}{Distribution Of Random Variable}{6}{0}{3}
+\beamer@subsectionintoc {3}{1}{Probability Mass Function}{6}{0}{3}
+\beamer@subsectionintoc {3}{2}{Example of PMF}{7}{0}{3}
+\beamer@subsectionintoc {3}{3}{Valid PMFs}{9}{0}{3}
+\beamer@subsectionintoc {3}{4}{Binomial Distribution}{10}{0}{3}
+\beamer@sectionintoc {4}{References}{11}{0}{4}
