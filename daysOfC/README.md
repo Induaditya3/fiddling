@@ -178,6 +178,8 @@ int main(){
 }
 ```
 
+There is also `realloc` which adds additional memory space to already *malloc'ed* memory.
+
 ## Pass by Value and Pass by Reference
 
 Generally, when parameters are provided to functions in C, the function usually receives copy of it, i.e., variables outside the scope remain unaffected  whatever we do inside that block scope of the function.
@@ -279,6 +281,8 @@ int main(){
 ```
 This illustrates that we can allocate memory inside some function and access it inside other function (*main* in this case) because memory is not automatically freed unless we do it ourselves, which we do by calling `free(heapData)`. Note also that address stored in `heapData` and in `array` is same but address of each local variables are different but quite similar, because stack allocates memory one after another.
 
+To check for memory leaks, run `valgrind ./prog`.
+
 ## Singly Linked List
 
 It stores many nodes which are connected together in one direction. Each node consists of data relevant to current node and address of the next node. If there is no node after certain node, we set address of the next node to `NULL`.
@@ -298,13 +302,12 @@ Header files *.h* are like interface of OCaml contained in *.mli* . Those files 
 It acts as a reference for available data structures and functions.
 One of the advantages of using header files is that we can use functions inside implementation of other functions without worrying over whether we defined helper functions earlier than where we use it.
 
-To check for memory leaks, run `valgrind ./prog`.
 
 As opposed to header files, source files *.c* only contain program logic and implementation of algorithms.
 
 ## Keywords
 
-`const` in front of avriable means that that variable cannot be modified after first assignment. It makes a variable read-only.
+`const` in front of a variable means that that variable cannot be modified after first assignment. It makes a variable read-only.
 
 `#include "library_name"` means that *library_name* is written by us and compiler should look for it in the current directory (or we full realtive or absolute path). As opposed to `#include <library_name>` which is generally found in location specified in system **PATH** variable.
 
