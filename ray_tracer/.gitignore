@@ -1,0 +1,38 @@
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.lot
+*.lof
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.pdf
+*.dvi
+*.ps
+
+# Backup files
+*~
+*.bak
+*.tmp
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Other files
+*.gz
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# Ignore the output directory if you have one
+output/

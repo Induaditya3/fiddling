@@ -25,6 +25,13 @@ char* stringAppend( char* destination, char* source){
     concat[totalLen] = '\0';
     return concat;
 }
+
+char* stringAppend2(char* src1, const char* src2){
+    size_t s1Length = strlen(s1);
+    size_t s2Length = strlen(s2);
+    // get enough space for storing two string s1 and s2 in s1
+    char* newstr = (char*) realloc(s1+s1Length,sizeof(char)*(s1Length+s2Length))
+}
 int main(){
     char* name = "Aditya Raj";    
     printf("%ld\n",stringLen(name));

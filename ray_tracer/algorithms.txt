@@ -1,0 +1,17 @@
+\begin{algorithm}
+    \caption{Calculate Specular Intensity}
+    \begin{algorithmic}[1]
+        \FUNCTION{calculateSpecularIntensity}{observerPosition, intersectionPoint, normalVector, lightDirection, lightIntensity, shininess, currentIntensity}
+            \STATE reflectedRay $\gets$ \CALL{calculateReflectedRay}{normalVector, lightDirection}
+            \STATE viewVector $\gets$ \CALL{subtractVectors}{observerPosition, intersectionPoint}
+            \STATE reflectionViewDotProduct $\gets$ \CALL{dotProduct}{reflectedRay, viewVector}
+            \STATE specularIntensity $\gets$ 0.0
+            \IF{reflectionViewDotProduct > 0.0 \AND shininess > 0}
+                \STATE specularIntensity $\gets$ currentIntensity + lightIntensity $\times$ \left( \frac{reflectionViewDotProduct}{\CALL{vectorMagnitude}{reflectedRay} \times \CALL{vectorMagnitude}{viewVector}} \right)^{shininess}
+            \ELSE
+                \STATE specularIntensity $\gets$ currentIntensity
+            \ENDIF
+            \RETURN specularIntensity
+        \ENDFUNCTION
+    \end{algorithmic}
+\end{algorithm}
