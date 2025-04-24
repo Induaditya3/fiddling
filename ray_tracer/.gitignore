@@ -10,7 +10,6 @@
 *.fls
 *.fdb_latexmk
 *.synctex.gz
-*.pdf
 *.dvi
 *.ps
 
@@ -34,5 +33,4 @@
 *.7z
 *.rar
 
-# Ignore the output directory if you have one
-output/
+
