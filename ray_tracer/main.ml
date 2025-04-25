@@ -1,5 +1,4 @@
 #use "vbrt.ml";;
-#require "parmap";;
 
 let create_tuple min_x max_x min_y max_y =
     let rec range start stop a = 
@@ -8,9 +7,10 @@ let create_tuple min_x max_x min_y max_y =
     in 
     let list_x = range min_x max_x [] in
     let list_y = range min_y max_y [] in 
-    let a l x = Parmap.parmap ~ncores:4 (fun y -> (x, y)) (Parmap.L l) in
+    let a l x = List.map  (fun y -> (x, y))  l
+    in
     List.flatten (
-        Parmap.parmap ~ncores:4 (a list_y) (Parmap.L list_x)
+        List.map  (a list_y)  list_x
         )
 
 let shader o tmin tmax ls ll (x, y) = 

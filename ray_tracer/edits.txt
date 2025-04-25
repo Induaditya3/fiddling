@@ -1,54 +1,25 @@
-Introduction
-
-
-
-
-
-
-Diffuse Reflections 
-Now, we will calculate the illumination of a point by both a point source and a directional source through diffuse reflection.
-
-Consider a point $ P $ in the scene, with $ \vec{N} $ representing the normal vector at $ P $ and $ \vec{L} $ as the directional vector of the light source. For directional light, $ \vec{L} $ is provided. However, for a point light source, we need to compute $ \vec{L} $ based on the position of the light source and the coordinates of point $ P $. Let $ l $ denote the width of the light (which is proportional to its intensity) and $ x $ denote the distance over which the light spreads. The line $ RS $ is perpendicular to $ \vec{L} $, and $ Q $ is the point of intersection.
-
-The ratio $ \frac{l}{x} $ represents the drop in intensity after the light reflects off the surface. For instance, if the light is perpendicular to point $ P $ on the surface, then $ \frac{l}{x} = 1 $.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.5\textwidth]{./figs/intensity.png}
-    \caption{Intensity after reflection}
-\end{figure}
-
-Consider the right triangle $ \triangle PQR $. It is evident that 
-
-$$\angle PRQ = \beta.$$
-
-Using the definition of cosine in a right triangle, we have:
-
-$$\cos \beta = \frac{l/2}{x/2} = \frac{l}{x}.$$
-
-We also know that the dot product of the vectors can be expressed as:
-
-$$\langle \vec{L}, \vec{N} \rangle = \|\vec{L}\| \|\vec{N}\| \cos \beta.$$
-
-Thus, we can rewrite $ \cos \beta $ as:
-
-$$\cos \beta = \frac{\langle \vec{L}, \vec{N} \rangle}{\|\vec{L}\| \|\vec{N}\|}.$$
-
-If $ \beta > 90^\circ $, the point is illuminated from the backside of the surface, and in this case, we treat the intensity as zero.
-
-To obtain the intensity after reflection, we multiply the intensity of the light by the factor $ \cos \beta $.
-
-In a scene, a single point can be illuminated by multiple light sources, which may vary in type. We simply sum the intensities of all the light sources that reach the point and then multiply the total intensity by the color of the point, which effectively adjusts the brightness.
-
-Mathematically, this can be expressed as:
-
-$$I_{\text{diffused}} = \sum I_i \frac{\langle \vec{L_i}, \vec{N} \rangle}{\|\vec{L_i}\| \|\vec{N}\|},$$
-
-where 
-
-- $ I_{\text{diffused}} $ is the intensity due to diffuse reflection,
-- $ I_i $ is the intensity of the $ i^{\text{th}} $ light source, which can be either a point source or a directional light,
-- $ \vec{L_i} $ is the directional vector of the $ i^{\text{th}} $ light source.
+\begin{algorithm}
+    \caption{Ray Tracing Algorithm}
+    \begin{algorithmic}[1]
+        \STATE Initialize scene with objects and lights
+        \STATE Set canvas resolution (width, height)
+        \STATE For each pixel (x, y) in the canvas:
+            \STATE \quad Generate ray from camera through pixel (x, y)
+            \STATE \quad Initialize color to background color
+            \STATE \quad Initialize closest intersection distance to infinity
+            \STATE \quad For each object in the scene:
+                \STATE \quad \quad If ray intersects object:
+                    \STATE \quad \quad \quad Calculate intersection point
+                    \STATE \quad \quad \quad Calculate normal at intersection point
+                    \STATE \quad \quad \quad Calculate distance to intersection
+                    \STATE \quad \quad \quad If distance is less than closest intersection distance:
+                        \STATE \quad \quad \quad \quad Update closest intersection distance
+                        \STATE \quad \quad \quad \quad Calculate color at intersection point
+                        \STATE \quad \quad \quad \quad Update color based on lighting
+            \STATE \quad Set pixel color to calculated color
+        \STATE Render the image
+    \end{algorithmic}
+\end{algorithm}
 
 Algorithm 
 
@@ -72,62 +43,33 @@ function calculateDiffuseIntensity(normalVector, lightVector, incomingIntensity)
     return diffuseIntensity 
 end function
 
-Specular reflection
 
-To model it, we use the simple fact that the angle made by the incident ray with the normal is equal to the angle made by the reflected ray with the normal.
 
-![intensity_of_specular](./figs/intensityspecular.png)
+    
 
-Here
+\begin{figure}[htbp]
+    \centerline{\includegraphics[width=0.38\textwidth]{./figs/intensity.png}}
+    \caption{Intensity after diffuse reflection}
+\end{figure}
 
-- $\vec{L}$ is the directional vector of light pointing from point $P$ on the surface to the point light source.
-- $\vec{R}$ is the reflected light, which makes the same angle with $\vec{N}$ as $\vec{L}$.
-- $\vec{V}$ is the view vector from point $P$ on the surface to the camera.
-- $\vec{N}$ is the normal vector.
 
-First, we express $\vec{R}$ in terms of $\vec{L}$ and $\vec{N}$.
 
-We know that $\vec{L}$ can be split into two components: one parallel to $\vec{N}$ and another perpendicular to it.
 
-$\vec{L_{\| \vec{N}}} = \langle \vec{L}, \hat{N} \rangle \hat{N}$
 
-Since 
 
-$\vec{L_{\| \vec{N}}} + \vec{L_{\perp \vec{N}}} = \vec{L}$
 
-we have
 
-$\implies \vec{L_{\perp \vec{N}}} = \vec{L} - \langle \vec{L}, \hat{N} \rangle \hat{N}$
 
-Thus, we can express $\vec{R}$ as:
 
-$\vec{R} = \vec{L_{\| \vec{N}}} - \vec{L_{\perp \vec{N}}$
 
-$\implies \vec{R} = 2 \langle \vec{L}, \hat{N} \rangle \hat{N} - \vec{L}$
 
-Now we determine the intensity due to specular reflection. For $\theta = 0$, the reflected vector and the view vector align, so brightness is at its maximum. If $\theta = 90^\circ$, no component of the reflected ray is in the direction of the view vector, so brightness is zero in this case.
 
-For $0 \leq \theta \leq 90^\circ$, we use $\cos \theta$ to model brightness. We define $s$ to vary the shininess of different objects.
 
-Then, the final expression for brightness due to specular reflection is:
 
-$I_{\text{specular}} = \sum I_i (\cos \theta)^s = \sum I_i \left( \frac{\langle \vec{R_i}, \vec{V_i} \rangle}{\|\vec{R_i}\| \|\vec{V_i}\|} \right)^s$
 
-Note that if $\theta > 90^\circ$, we might get a negative total intensity, which doesn't make sense. In those cases, we set the term to zero as before.
+$$
 
-Combining both diffuse and specular brightness, along with ambient light, we get:
 
-$I_{\text{total}} = I_a + \sum I_i \left[ \frac{\langle \vec{L_i}, \vec{N} \rangle}{\|\vec{L}_i\| \|\vec{N}\|} + \left( \frac{\langle \vec{R_i}, \vec{V} \rangle}{\|\vec{R_i}\| \|\vec{V}\|} \right)^s \right]$
-
-Here
-
-- $I_{\text{total}}$ is the total intensity at the point.
-- $I_a$ is the intensity of ambient light.
-- $I_i$ is the intensity of the $i$-th light, which could be a point source or directional.
-- $\vec{L_i}$ is the incident vector of the $i$-th light.
-- $\vec{R_i}$ is the reflected vector of the $i$-th light.
-- $\vec{N}$ is the normal vector at the point.
-- $\vec{V}$ is the view vector at the point.
 
 Algorithm 
 
@@ -146,33 +88,17 @@ function calculateSpecularIntensity(observerPosition, intersectionPoint, normalV
     return specularIntensity 
 end function
 
-Shadows 
 
-A shadow is the obstruction of light by one or more objects at a point.
 
-What this means for us is that we need to check if a particular light source, such as a point source or directional light, intersects any other object in the scene before reaching the point for which we are calculating illumination due to that light. If that intersection occurs, then we do not include that light's intensity in the calculation of the total intensity; otherwise, we do.
 
-In order to do that, we shoot a ray from the point of interest (for which we want to know whether it is shadowed) in the direction of the light source.
 
-That ray is represented as 
 
-$\vec{R} = P + t \vec{L}$
 
-Here
 
-- $P$ is the point of interest.
-- $\vec{L}$ is the ray of light from $P$ toward the light source.
-- $t$ is the parameter. For a point source, $t \in [0^+, 1]$ (at $t = 1$, we reach the light source itself), and for directional light, $t \in [0^+, \infty)$. We know that a point on a sphere will definitely intersect itself, so practically we take $0.0001$ instead of $0^+$. (I tried using `\epsilon_{\text{float}}` and the results were not visually appealing, so to speak.)
 
-Next, we find the closest intersection of the sphere with the ray in the suitable range. If a sphere exists, then only ambient light illuminates that point; otherwise, both specular and diffuse reflections also occur.
 
-Mirror Reflection
 
-After a ray from a camera intersects at a point on an object, we find the reflected ray at that point (including its color) and then shoot a reflected ray to determine if it intersects another object and calculate the resulting color. We can do this as many times as we like (but usually, after three reflections, we observe diminishing returns per computation). Eventually, we take a weighted sum of all the colors, utilizing the `rfl` property of spheres.
 
-Total Intensity of Light
-
-Here, we combine all the effects, such as different kinds of reflection, into a single function, except for mirror reflection, which is handled through the ray tracing code itself.
 
 Algorithm
 
