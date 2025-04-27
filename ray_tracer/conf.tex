@@ -41,9 +41,7 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Ray Tracing In Functional Programming Language\\
-
-}
+\title{Ray Tracing In Functional Programming Language}
 
 \author{\IEEEauthorblockN{Dr. Babul Prasad Tewari}
 \IEEEauthorblockA{\textit{Department of} \\
@@ -69,11 +67,15 @@ email address or ORCID}
 \maketitle
 
 \begin{abstract}
-to do
+  This paper explores the theory and implementation of ray tracing in OCaml. We discuss the mathematical concepts and algorithms that drive the rendering process, followed by implementation using OCaml's functional programming paradigm.
+
+  Our analysis compares the merits and challenges of functional versus object-oriented approaches, highlighting the advantages of code clarity, static type safety, and ease of debugging in a functional style. We also address performance considerations related to recursive function calls and state management complexities.
+  
+  Ultimately, we advocate for implementing a basic ray tracer in a functional style, demonstrating that this approach enhances code quality while aligning with the principles of immutability and strong typing. 
 \end{abstract}
 
 \begin{IEEEkeywords}
-ray tracing, three-dimensional graphics, functional programming.
+ray tracing, three-dimensional graphics, functional programming, OCaml.
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -89,7 +91,7 @@ In ray tracing, image synthesis happens by shooting rays that go through the pro
 
 Historically, ray tracers have been developed using object-oriented (OO) techniques for several reasons, primarily due to their size and complexity. However, many students learning computer graphics are unlikely to write a production-grade ray tracer from scratch. Therefore, for a simple ray tracer, we recommend using a functional programming style for the following reasons.
 
-First, ray tracing is inherently mathematical in nature, making it straightforward to convert concepts into code. Second, due to immutability, code is easier to isolate and debug. Most importantly, the code is succinct and readable, due to the type inference feature of functional programming.
+First, ray tracing is inherently mathematical in nature, making it straightforward to convert concepts into code. Second, due to immutability, code is easier to isolate and debug. Third and most importantly, the code is succinct and readable, due to the type inference feature of functional programming.
 
 \begin{algorithm}
   \caption{Ray Tracing Algorithm}
@@ -115,7 +117,7 @@ First, ray tracing is inherently mathematical in nature, making it straightforwa
 \end{algorithm}
 
 \section{Architecture}
-We defined following functionalities for our ray tracer as illustrated through Fig.~\ref{Core functions}, Fig.~\ref{Utility functions}, Fig.~\ref{Point type}, Fig.~\ref{Light type} and Fig.~\ref{Sphere type},.
+We defined following functionalities for our ray tracer as illustrated through Fig.~\ref{Core functions}, Fig.~\ref{Utility functions}, Fig.~\ref{Point type}, Fig.~\ref{Light type} and Fig.~\ref{Sphere type}.
 
 \begin{figure}[htbp]
   \centerline{\includegraphics[width=0.48\textwidth]{./figs/corediagram.png}}
@@ -579,8 +581,110 @@ for y = - gh/2 to gh/2 do
 done
 \end{lstlisting}
 
+\section{Example scene with output}
+Here, we define four spheres : three equally sized and one giant one . We also utilise three kinds of light: point source, directional and ambient. Output image is displayed in Fig.~\ref{output}. Some other scenes rendered using our ray tracer is given in  Fig.~\ref{demo1}, Fig.~\ref{demo2}, Fig.~\ref{demo3} and Fig.~\ref{demo4}.
+
+\begin{lstlisting}
+let s1 = 
+  {
+      c = {x = 0.;y= - 1.; z = 3.};
+      r = 1.;
+      color = (255, 0, 0);
+      s = 9900;
+      rfl = 0.2
+  } in 
+let s2 =
+{
+    c = {x = -2.; y = 1.; z = 3.};
+    r = 1.;
+    color = (0, 0, 255);
+    s = 5;
+    rfl = 0.
+} in 
+let s3 =
+{
+    c = {x =  2. ; y = 1. ; z = 3.};
+    r = 1.;
+    color = (0, 255, 0);
+    s = 50;
+    rfl = 0.5
+} in
+let s4 =
+{
+    c = {x = 0.; y = - 5001.; z = 0.};
+    r = 5000.;
+    color = (255, 255, 0);
+    s = 1000;
+    rfl = 0.01
+} in
+(* list of sphere *)
+let ls = [s1;s2;s3;s4] in
+let l1 =
+{
+    k = 'a';
+    i = 0.2;
+    v = None
+} in
+let l2 =
+{
+    k= 'p';
+    i = 0.6;
+    v = Some {x =2.;y= 1.;z= 0.}
+} in 
+let l3 =
+{
+    k = 'd';
+    i = 0.2;
+    v = Some {x=1.;y= 4.;z= 4.}
+} in 
+(* list of lights *)
+let ll = [l1;l2;l3] 
+\end{lstlisting}
+
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.48\textwidth]{./figs/output.png}}
+  \caption{Output}
+  \label{output}
+\end{figure}
+
+
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.48\textwidth]{./figs/demo1.png}}
+  \caption{Demo image 1}
+  \label{demo1}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.48\textwidth]{./figs/demo2.png}}
+  \caption{Demo image 2}
+  \label{demo2}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.48\textwidth]{./figs/demo3.png}}
+  \caption{Demo image 3}
+  \label{demo3}
+\end{figure}
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.48\textwidth]{./figs/demo4.png}}
+  \caption{Demo image 4}
+  \label{demo4}
+\end{figure}
+
+\section{Result and Analysis}
+
+As noted in the introduction, there is good reason why ray tracers are designed using object-oriented (OO) techniques. Here, we will compare the merits and challenges we face in a functional approach with those in object-oriented ones.
+
+First, OO design handles large and complex software more easily than functional ones, both in development and maintenance, even though functional code is succinct and expressive. 
+
+Second, there is difficulty in extending the ray tracer. For example, to support new geometric primitives, we have to aggressively modify existing code. Functions that check for intersections with objects have to be modified to determine the kind of object and call the appropriate function to check for intersection. This would be much easier with function overloading, where the type of object is found at runtime, allowing the appropriate intersection function to be called. The advantage is twofold: the code is cleaner, and the function that calls the intersection function can do so in the same way for each kind of object. However, this convenience comes at a cost: it makes the code harder to debug. In functional programming, each binding (or variable) has a type associated with it, which catches many errors at compile time. Thus, strong static typing combined with immutability makes the code much easier to debug and understand than OO code.
+
+Third, there is performance overhead because recursive function calls create new data structures rather than modifying existing ones, which increases time and space complexity.
+
+Finally, state management can be complex in pure functional programming due to immutability. As OCaml is multiparadigm, it provides \textit{ref}, a mutable construct that makes certain portions easier to implement.
 
 \begin{thebibliography}{00}
+
 \bibitem{b1} A. Glassner, ``An Introduction to Ray Tracing,'' Morgan Kaufmann, 1989.
 
 \bibitem{ericm} E. Lengyel, ``Mathematics for 3D game programming and computer graphics,'' Cengage Course Technology PTR, 2019.
@@ -615,6 +719,19 @@ done
 \bibitem{b16} T. Whitted, ``An improved illumination model for shaded display,'' Communications of the ACM 23, June 1980.
 
 \bibitem{b17} J. F. Hughes, A. van Dam, M. McGuire, D. F. Sklar, J. D. Foley, S. K. Feiner, K. Akeley, ``Computer graphics: Principles and Practice,'' Addison-Wesley, 2013.
+
+\bibitem{r1} P. J. Schneider and D. H. Eberly, ``Geometric tools for computer graphics,'' Morgan Kaufmann Publishers, 2003.
+
+\bibitem{r2} P. S. Strauss, ``A realistic lighting model for computer animators,'' IEEE Comput. Graph. Appl., 1990.
+
+\bibitem{r3} B. T. Phong, ``Illumination for computer generated pictures,'' Commun. ACM, 1975.
+
+\bibitem{r4} J. Hultquist, ``Intersection of a ray with a sphere,'' in Graphics Gems, A. S. Glassner, Ed., Academic Press Professional, 1990.
+
+\bibitem{r5} R. Hall, ``Illumination and color in computer generated imagery,'' Springer-Verlag New York, 1989.
+
+\bibitem{r6} T. Akenine-Möller, E. Haines, and N. Hoffman, ``Real-time rendering,'' A K Peters, Ltd., 2008.
+
 \end{thebibliography}
 
 \end{document}
