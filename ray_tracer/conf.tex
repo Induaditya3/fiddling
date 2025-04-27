@@ -84,34 +84,67 @@ Object-order rendering involves iterating over each object and figuring out whic
 In image-order rendering, for each pixel, the nearest visible object is found, and that pixel is colored using the given shading model. 
 The former is classified into rasterization algorithms (or projective algorithms), and the latter is termed the ray tracing algorithm (image-space algorithm). Same effects, like reflections and shadows, are easy to implement in ray tracing compared to rasterization\cite{kevin}.
 
-In ray tracing, image synthesis happens by shooting rays that go through the projection plane, and the nearest intersection with an object is found. If the object is reflective, rays bounce off it and hit other objects, which also influences color according to the shading model\cite{kevin}. In the current implementation\cite{mycode}, we have utilized the simplest shading model called Phong shading\cite{peter} and used the simplest three-dimensional geometrical object, a sphere, to illustrate ray tracing in the functional programming paradigm. To this end, we decided to use OCaml for its strong support for functional programming and its mechanisms to write imperative code as well, which will enable us to demonstrate alternative ways in the same programming language.
+In ray tracing, image synthesis happens by shooting rays that go through the projection plane, and the nearest intersection with an object is found. If the object is reflective, rays bounce off it and hit other objects, which also influences color according to the shading model\cite{kevin}. In our implementation\cite{mycode}, we have utilized the simplest shading model called Phong shading\cite{peter} and used the simplest three-dimensional geometrical object, a sphere, to illustrate ray tracing in the functional programming paradigm. To this end, we decided to use OCaml for its strong support for functional programming and its mechanisms to write imperative code as well, which will enable us to demonstrate alternative ways in the same programming language.
+
+
+Historically, ray tracers have been developed using object-oriented (OO) techniques for several reasons, primarily due to their size and complexity. However, many students learning computer graphics are unlikely to write a production-grade ray tracer from scratch. Therefore, for a simple ray tracer, we recommend using a functional programming style for the following reasons.
+
+First, ray tracing is inherently mathematical in nature, making it straightforward to convert concepts into code. Second, due to immutability, code is easier to isolate and debug. Most importantly, the code is succinct and readable, due to the type inference feature of functional programming.
+
+\begin{algorithm}
+  \caption{Ray Tracing Algorithm}
+  \begin{algorithmic}[1]
+      \STATE Initialize scene with objects and lights
+      \STATE Set canvas resolution (width, height)
+      \STATE For each pixel (x, y) in the canvas:
+          \STATE \quad Generate ray from camera through pixel (x, y)
+          \STATE \quad Initialize color to background color
+          \STATE \quad Initialize closest intersection distance to infinity
+          \STATE \quad For each object in the scene:
+              \STATE \quad \quad If ray intersects object:
+                  \STATE \quad \quad \quad Calculate intersection point
+                  \STATE \quad \quad \quad Calculate normal at intersection point
+                  \STATE \quad \quad \quad Calculate distance to intersection
+                  \STATE \quad \quad \quad If distance is less than closest intersection distance:
+                      \STATE \quad \quad \quad \quad Update closest intersection distance
+                      \STATE \quad \quad \quad \quad Calculate color at intersection point
+                      \STATE \quad \quad \quad \quad Update color based on lighting
+          \STATE \quad Set pixel color to calculated color
+      \STATE Render the image
+  \end{algorithmic}
+\end{algorithm}
 
 \section{Architecture}
-We defined following functionalities for our ray tracer as illustrated through figures.
+We defined following functionalities for our ray tracer as illustrated through Fig.~\ref{Core functions}, Fig.~\ref{Utility functions}, Fig.~\ref{Point type}, Fig.~\ref{Light type} and Fig.~\ref{Sphere type},.
 
 \begin{figure}[htbp]
-  \centerline{\includegraphics[width=0.38\textwidth]{./figs/corediagram.png}}
+  \centerline{\includegraphics[width=0.48\textwidth]{./figs/corediagram.png}}
   \caption{Core functions}
+  \label{Core functions}
 \end{figure}
 
 \begin{figure}[htbp]
   \centerline{\includegraphics[width=0.48\textwidth]{./figs/utilsdiagram.png}}
   \caption{Utility functions}
+  \label{Utility functions}
 \end{figure}
 
 \begin{figure}[htbp]
   \centerline{\includegraphics[width=0.38\textwidth]{./figs/pointdiagram.png}}
   \caption{Point type}
+  \label{Point type}
 \end{figure}
 
 \begin{figure}[htbp]
   \centerline{\includegraphics[width=0.1\textwidth]{./figs/lightdigram.png}}
   \caption{Light type}
+  \label{Light type}
 \end{figure}
 
 \begin{figure}[htbp]
-  \centerline{\includegraphics[width=0.58\textwidth]{./figs/spherediagram.png}}
+  \centerline{\includegraphics[width=0.52\textwidth]{./figs/spherediagram.png}}
   \caption{Sphere type}
+  \label{Sphere type}
 \end{figure}
 
 \section{Coordinate System}
@@ -165,30 +198,152 @@ where $G_w$ and $G_h$ are the maximum width and height of the graphics window, r
 However, we know that the viewport is in 3D space, so it also has $V_z = d$ for every point on this viewport (in mathematical terms, called the \textit{projection plane}). \\
 Thus, for every pixel $(G_x, G_y)$ on the graphics window, we can calculate the corresponding $(V_x, V_y, V_z)$ of the viewport.
 
+\section{Rays}
+
+The rays are simply straight lines emanating from the origin $O$ and passing through various points of the viewport, ultimately intersecting the objects in the scene.
+
+We will represent a straight line using the parametric form:
+
+$$P = O + t(V - O)$$
+
+Here:
+\begin{itemize}
+    \item $P$ is any point on the line.
+    \item $O$ is the origin (where the camera is positioned).
+    \item $V$ is any point on the viewport.
+    \item $t$ is the parameter, where $-\infty < t < \infty$.
+\end{itemize}
+
+We vary $t$ to obtain various points on the straight line.
+
+Also note that:
+\begin{itemize}
+    \item If $t < 0$, then $P$ is behind the camera.
+    \item If $0 \leq t \leq 1$, then $P$ lies between the camera and the viewport.
+    \item If $t > 1$, then $P$ is in front of the viewport.
+\end{itemize}
+
+\section{Sphere}
+
+The sphere is the simplest geometric object and will be used as an object in the scene.
+
+We represent a sphere as:
+
+$$\langle P - C, P - C \rangle = r^2$$
+
+Here:
+\begin{itemize}
+    \item $P$ is a point on the surface of the sphere.
+    \item $C$ is the center of the sphere.
+    \item $r$ is the radius of the sphere.
+\end{itemize}
+
+
+\section{Intersection of Ray and Sphere}
+
+Let $P$ be the point of intersection; it is a common point to both the ray and the sphere.
+
+The equation of the ray is:
+
+$$P = O + t \vec{D}$$
+
+where $\vec{D} = V - O$ is the direction of the ray.
+
+The equation of the sphere is:
+
+$$\langle P - C, P - C \rangle = r^2$$
+
+Substituting the value of $P$ into the equation of the sphere gives:
+
+$$\langle O + t \vec{D} - C, O + t \vec{D} - C \rangle = r^2$$
+
+$$\langle t \vec{D} + \vec{CO}, t \vec{D} + \vec{CO} \rangle = r^2$$
+
+$$\langle t \vec{D} + \vec{CO}, t \vec{D} \rangle + \langle t \vec{D} + \vec{CO}, \vec{CO} \rangle = r^2$$
+
+$$\langle t \vec{D}, t \vec{D} \rangle + \langle t \vec{D}, \vec{CO} \rangle + \langle \vec{CO}, t \vec{D} \rangle + \langle \vec{CO}, \vec{CO} \rangle = r^2$$
+
+Finally, we arrive at the quadratic equation:
+
+$$at^2 + bt + c = 0$$
+
+where:
+\begin{itemize}
+    \item $a = \| \vec{D} \|^2$
+    \item $b = 2 \langle \vec{D}, \vec{CO} \rangle$
+    \item $c = \| \vec{CO} \|^2 - r^2$
+\end{itemize}
+
+This makes sense because a ray can intersect a sphere at either 0, 1, or 2 points.
+
+We can now find the values of $t$ using the quadratic formula:
+
+$$t_{1,2} = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+
+After finding the values of $t$, we can substitute them back into the equation of the ray to find the point $P$. We should be careful to take the closest point $P$ (the one which is visible to the camera) for which $t > 1$ (indicating that the objects are in front of the viewport).
+
+\section{Lighting}
+
+We use white light and assume that light has the same intensity irrespective of the distance from the source.
+
+\subsection{Point Lights}
+
+Point lights can be completely described by:
+\begin{itemize}
+    \item The coordinate $Q$ of their location.
+    \item The intensity of light.
+\end{itemize}
+
+Any vector from an arbitrary point $P$ to the light source $Q$ will be denoted by $\vec{L}$.
+
+\subsection{Directional Lights}
+
+Directional lights are used to represent light sources that are situated very far away compared to the distances between objects in the scene. Thus, rays of light coming from these sources are essentially parallel to each other. Therefore, $\vec{L}$ is the same for every point $P$ in the scene.
+
+To model these lights, we need:
+\begin{itemize}
+    \item A direction vector $\vec{L}$.
+    \item The intensity of light.
+\end{itemize}
+
+\subsection{Ambient Light}
+
+In real life, an object that does not receive direct light is not completely dark because reflected light illuminates it. To avoid treating every object as a light source, we will use ambient light, which essentially illuminates every object in the scene.
+
+To model ambient light, we need:
+\begin{itemize}
+    \item The intensity of light.
+\end{itemize}
+
+\subsection{Lighting a Point}
+
+We define a type for light as follows:
+
+\begin{lstlisting}
+(* type for light *)
+(* kind of light is represented by k field - *)
+(* p - for point source *)
+(* d - for directional light *)
+(* a - for ambient source *)
+type light = 
+  {
+    k : char;
+    i : float;
+    v : point option
+  }
+\end{lstlisting}
+
+The field $v$ stores:
+\begin{itemize}
+    \item The location of the point, in the case of a point source.
+    \item The direction vector, in the case of a directional light.
+    \item `None`, in the case of an ambient source.
+\end{itemize}
+
+The sum of all intensities of light should equal 1. If it does not, some points in the scene will be overexposed.
 \section{Phong Shading Model}
 
-\begin{algorithm}
-    \caption{Ray Tracing Algorithm}
-    \begin{algorithmic}[1]
-        \STATE Initialize scene with objects and lights
-        \STATE Set canvas resolution (width, height)
-        \STATE For each pixel (x, y) in the canvas:
-            \STATE \quad Generate ray from camera through pixel (x, y)
-            \STATE \quad Initialize color to background color
-            \STATE \quad Initialize closest intersection distance to infinity
-            \STATE \quad For each object in the scene:
-                \STATE \quad \quad If ray intersects object:
-                    \STATE \quad \quad \quad Calculate intersection point
-                    \STATE \quad \quad \quad Calculate normal at intersection point
-                    \STATE \quad \quad \quad Calculate distance to intersection
-                    \STATE \quad \quad \quad If distance is less than closest intersection distance:
-                        \STATE \quad \quad \quad \quad Update closest intersection distance
-                        \STATE \quad \quad \quad \quad Calculate color at intersection point
-                        \STATE \quad \quad \quad \quad Update color based on lighting
-            \STATE \quad Set pixel color to calculated color
-        \STATE Render the image
-    \end{algorithmic}
-\end{algorithm}
+
  
 \subsection{Diffuse Reflections}
 
@@ -384,7 +539,7 @@ let rec rtx_inner o d tmin tmax sl ll limit =
 let rtx o d tmin tmax sl ll = sphere_color (rtx_inner o d tmin tmax sl ll 3)
 \end{lstlisting}
 
-Now there two ways to start the ray tracing: 
+Now there two ways to start the ray tracing:\\ 
 In functional style:
 
 \begin{lstlisting}
@@ -423,6 +578,8 @@ for y = - gh/2 to gh/2 do
   done;
 done
 \end{lstlisting}
+
+
 \begin{thebibliography}{00}
 \bibitem{b1} A. Glassner, ``An Introduction to Ray Tracing,'' Morgan Kaufmann, 1989.
 
