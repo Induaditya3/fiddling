@@ -7,83 +7,117 @@ const int WINDOW_WIDTH =  700 ;
 const int WINDOW_HEIGHT = 700;
 
 
-// === LIGHTS ===
+
+// ─── LIGHTS ────────────────────────────────────────────────
+// Dark ambient — near-black night sky
 Light lights[] = {
-    // Central soft white glow (symmetry axis)
-    { .k = 'a', .i = 0.15f, .v = {0.0f, 0.0f, 0.0f} },
+    { .k = 'a', .i = 0.08, .v = {0, 0, 0} },
 
-    // Left warm amber lamp (mirror of right)
-    { .k = 'p', .i = 0.8f, .v = {-3.0f, 2.0f, 1.5f} },
+    // Neon pink point light — main scene glow (street level)
+    { .k = 'p', .i = 0.50, .v = { 0.0,  1.0, 8.0 } },
 
-    // Right warm amber lamp (mirror of left)
-    { .k = 'p', .i = 0.8f, .v = {3.0f, 2.0f, 1.5f} },
+    // Cyan point light — from the right, cold fill
+    { .k = 'p', .i = 0.30, .v = { 4.0,  2.0, 6.0 } },
 
-    // Left cool blue accent (mirror of right)
-    { .k = 'd', .i = 0.4f, .v = {-1.0f, -0.5f, 2.5f} },
-
-    // Right cool blue accent (mirror of left)
-    { .k = 'd', .i = 0.4f, .v = {1.0f, -0.5f, 2.5f} },
+    // Deep purple directional — top-down moody backlight
+    { .k = 'd', .i = 0.12, .v = { 0.0, -1.0, 0.3 } },
 };
-int num_lights = sizeof(lights) / sizeof(Light);
+int num_lights = 4;
 
+// ─── HELPER MACRO ──────────────────────────────────────────
+// Just for readability while defining triangles
+#define TRI(ax,ay,az, bx,by,bz, cx,cy,cz, R,G,B, shin, refl) \
+    { .k = 't', .tri = {                                       \
+        .a={ax,ay,az}, .b={bx,by,bz}, .c={cx,cy,cz},          \
+        .color={R,G,B}, .s=shin, .rfl=refl }}
 
-// === SPHERES ===
-Sphere spheres[] = {
-    // Central golden orb (axis point)
-    {
-        .c     = {0.0f, 1.5f, 4.0f},
-        .r     = 0.7f,
-        .color = {255, 220, 0},
-        .s     = 4000,
-        .rfl   = 0.85f
-    },
+// ═══════════════════════════════════════════════════════════
+//  SCENE
+// ═══════════════════════════════════════════════════════════
+Hittable hittables[] = {
 
-    // Left silver sphere (mirror of right)
-    {
-        .c     = {-2.0f, 1.2f, 3.5f},
-        .r     = 0.6f,
-        .color = {200, 200, 200},
-        .s     = 3000,
-        .rfl   = 0.75f
-    },
+    // ── GRID FLOOR ─────────────────────────────────────────
+    // Two large triangles forming the ground quad
+    // Slightly reflective dark surface with cyan tint (wet street)
+    //   (-12,-1.8, 2) --- (12,-1.8, 2)
+    //        |                  |
+    //   (-12,-1.8,30) --- (12,-1.8,30)
 
-    // Right silver sphere (mirror of left)
-    {
-        .c     = {2.0f, 1.2f, 3.5f},
-        .r     = 0.6f,
-        .color = {200, 200, 200},
-        .s     = 3000,
-        .rfl   = 0.75f
-    },
+    TRI(-12,-1.8, 2,   12,-1.8, 2,   12,-1.8,30,   10,30,35,  8, 0.55),
+    TRI(-12,-1.8, 2,   12,-1.8,30,  -12,-1.8,30,   10,30,35,  8, 0.55),
 
-    // Left mossy stone (mirror of right)
-    {
-        .c     = {-0.5f, 0.3f, 2.8f},
-        .r     = 0.5f,
-        .color = {80, 120, 60},
-        .s     = 150,
-        .rfl   = 0.3f
-    },
+    // ── LEFT BUILDING — tall slab ──────────────────────────
+    // Front face (two triangles = quad)
+    //  neon-purple tinted concrete
+    TRI(-9.0, 8.0, 18,  -5.5, 8.0, 18,  -5.5,-1.8,18,   40,10,60, 15, 0.10),
+    TRI(-9.0, 8.0, 18,  -5.5,-1.8, 18,  -9.0,-1.8,18,   40,10,60, 15, 0.10),
 
-    // Right mossy stone (mirror of left)
-    {
-        .c     = {0.5f, 0.3f, 2.8f},
-        .r     = 0.5f,
-        .color = {80, 120, 60},
-        .s     = 150,
-        .rfl   = 0.3f
-    },
+    // Right face (side, darker)
+    TRI(-5.5, 8.0, 18,  -5.5, 8.0, 28,  -5.5,-1.8,28,   25, 5,40, 10, 0.08),
+    TRI(-5.5, 8.0, 18,  -5.5,-1.8, 28,  -5.5,-1.8,18,   25, 5,40, 10, 0.08),
 
-    // Reflective floor (symmetrical base)
-    {
-        .c     = {0.0f, -5001.0f, 0.0f},
-        .r     = 5000.0f,
-        .color = {180, 180, 180},
-        .s     = 1000,
-        .rfl   = 0.4f
-    },
+    // Roof (flat top)
+    TRI(-9.0, 8.0, 18,  -5.5, 8.0, 18,  -5.5, 8.0, 28,   60,20,90, 30, 0.20),
+    TRI(-9.0, 8.0, 18,  -5.5, 8.0, 28,  -9.0, 8.0, 28,   60,20,90, 30, 0.20),
+
+    // ── RIGHT BUILDING — shorter, wider ───────────────────
+    // Front face — hot pink neon tint
+    TRI( 5.0, 5.5, 16,   9.5, 5.5, 16,   9.5,-1.8,16,  100, 5,80, 20, 0.12),
+    TRI( 5.0, 5.5, 16,   9.5,-1.8, 16,   5.0,-1.8,16,  100, 5,80, 20, 0.12),
+
+    // Left face (side)
+    TRI( 5.0, 5.5, 16,   5.0, 5.5, 26,   5.0,-1.8,26,   70, 3,55, 12, 0.08),
+    TRI( 5.0, 5.5, 16,   5.0,-1.8, 26,   5.0,-1.8,16,   70, 3,55, 12, 0.08),
+
+    // Roof
+    TRI( 5.0, 5.5, 16,   9.5, 5.5, 16,   9.5, 5.5, 26,   130,10,100,40, 0.25),
+    TRI( 5.0, 5.5, 16,   9.5, 5.5, 26,   5.0, 5.5, 26,   130,10,100,40, 0.25),
+
+    // ── CENTER BACKGROUND TOWER — thin skyscraper ─────────
+    // Front face — cold cyan glass
+    TRI(-1.5,14.0, 25,   1.5,14.0, 25,   1.5,-1.8,25,    5,180,200, 80, 0.55),
+    TRI(-1.5,14.0, 25,   1.5,-1.8, 25,  -1.5,-1.8,25,    5,180,200, 80, 0.55),
+
+    // Right face
+    TRI( 1.5,14.0, 25,   1.5,14.0, 32,   1.5,-1.8,32,    3,120,140, 50, 0.40),
+    TRI( 1.5,14.0, 25,   1.5,-1.8, 32,   1.5,-1.8,25,    3,120,140, 50, 0.40),
+
+    // Pointed roof — single triangle spike (cyberpunk antenna)
+    TRI(-1.5,14.0, 25,   1.5,14.0, 25,   0.0,18.0,25,    0,255,255,120, 0.60),
+
+    // ── NEON SIGN — floating diamond (4 triangles) ────────
+    // A flat diamond shape in front of the left building
+    // Glowing hot pink, very shiny
+    //        top (−2.5, 1.5, 10)
+    //  left (−4,0,10)    right (−1,0,10)
+    //        bot (−2.5,−1,10)
+    TRI(-2.5, 1.5,10,  -4.0, 0.0,10,  -2.5,-1.0,10,  255, 20,180,200,0.30),
+    TRI(-2.5, 1.5,10,  -2.5,-1.0,10,  -1.0, 0.0,10,  255, 20,180,200,0.30),
+
+    // ── NEON SIGN — floating triangle (right side) ────────
+    // Equilateral-ish glowing cyan triangle
+    TRI( 2.5, 2.5, 9,   4.5,-0.5, 9,   0.5,-0.5, 9,   20,255,230,200,0.35),
+
+    // ── FLYING DEBRIS / SHARDS (foreground atmosphere) ────
+    // Small dark angular shards floating in mid-air
+
+    // Shard 1 — left foreground
+    TRI(-3.5, 0.5, 4,  -2.8, 1.2, 4,  -3.0, 0.2, 4,   15,15,25, 50, 0.70),
+
+    // Shard 2 — right foreground
+    TRI( 3.0, 0.8, 3,   3.8, 0.2, 3,   3.2, 1.4, 3,   15,15,25, 50, 0.70),
+
+    // Shard 3 — center high
+    TRI(-0.4, 2.8, 5,   0.4, 2.5, 5,   0.1, 3.4, 5,   20,20,35, 50, 0.65),
+
+    // ── BACK WALL / SKY BACKDROP ──────────────────────────
+    // A huge dark quad far back — acts as the night sky
+    // Very dark navy, no reflectivity
+    TRI(-20,20,35,  20,20,35,  20,-1.8,35,    5, 5,18,  2, 0.0),
+    TRI(-20,20,35,  20,-1.8,35, -20,-1.8,35,  5, 5,18,  2, 0.0),
+
 };
-int num_spheres = sizeof(spheres) / sizeof(Sphere);
+int num_hittables = 30;
 
 bool quit()
 {
@@ -137,7 +171,7 @@ int main(void) {
 
             Point v = g_to_viewport(-x+x_offset, -y+y_offset, WINDOW_WIDTH, WINDOW_HEIGHT);
             Point d = sub3(v,o);
-            RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_spheres, spheres,lights);
+            RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_hittables, hittables,lights);
             Uint8 r = (Uint8) rgb.r;
             Uint8 g = (Uint8) rgb.g;
             Uint8 b = (Uint8) rgb.b;

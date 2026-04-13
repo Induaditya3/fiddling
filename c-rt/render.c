@@ -6,59 +6,106 @@
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 720;
 
-// === LIGHTS ===
+
+// ─── LIGHTS ────────────────────────────────────────────────
+// Ambient light (soft warm fill)
 Light lights[] = {
-    // Ambient light
-    { .k = 'a', .i = 0.2f, .v = {0.0f, 0.0f, 0.0f} },
+    { .k = 'a', .i = 0.15, .v = {0, 0, 0} },
 
-    // Point light
-    { .k = 'p', .i = 0.6f, .v = {2.0f, 1.0f, 0.0f} },
+    // Directional light from upper-left (warm sunset angle)
+    { .k = 'd', .i = 0.65, .v = {-0.6, 0.8, 0.3} },
 
-    // Directional light
-    { .k = 'd', .i = 0.2f, .v = {1.0f, 4.0f, 4.0f} },
+    // Point light — mimics the sun glow up close
+    { .k = 'p', .i = 0.20, .v = {0.0, 3.0, 8.0} },
 };
-int num_lights = sizeof(lights) / sizeof(Light);
+int num_lights = 3;
 
+// ─── SPHERES ───────────────────────────────────────────────
 
-// === SPHERES ===
-Sphere spheres[] = {
-    // s1 - Red sphere
-    {
-        .c     = {0.0f, -1.0f, 3.0f},
-        .r     = 1.0f,
-        .color = {255, 0, 0},
-        .s     = 9900,
-        .rfl   = 0.2f
-    },
-
-    // s2 - Blue sphere
-    {
-        .c     = {-2.0f, 1.0f, 3.0f},
-        .r     = 1.0f,
-        .color = {0, 0, 255},
-        .s     = 5,
-        .rfl   = 0.0f
-    },
-
-    // s3 - Green sphere
-    {
-        .c     = {2.0f, 1.0f, 3.0f},
-        .r     = 1.0f,
-        .color = {0, 255, 0},
-        .s     = 50,
-        .rfl   = 0.5f
-    },
-
-    // s4 - Yellow floor sphere
-    {
-        .c     = {0.0f, -5001.0f, 0.0f},
-        .r     = 5000.0f,
-        .color = {255, 255, 0},
-        .s     = 1000,
-        .rfl   = 0.01f
-    },
+// 1. Large SUN sphere — far away, glowing yellow, not shiny, not reflective
+const Sphere sun = {
+    .r     = 3.5,
+    .c     = { 0.0, 4.5, 30.0 },
+    .color = { 255, 220, 50 },
+    .s     = -1,      // matte (no specular)
+    .rfl   = 0.0,
 };
-int num_spheres = sizeof(spheres) / sizeof(Sphere);
+
+// 2. Blue reflective sphere — center stage
+const Sphere blue_sphere = {
+    .r     = 1.0,
+    .c     = { 0.0, 0.0, 6.0 },
+    .color = { 50, 120, 255 },
+    .s     = 80,
+    .rfl   = 0.45,
+};
+
+// 3. Red matte sphere — left side
+const Sphere red_sphere = {
+    .r     = 0.7,
+    .c     = { -2.2, -0.3, 5.0 },
+    .color = { 220, 50, 50 },
+    .s     = 20,
+    .rfl   = 0.05,
+};
+
+// 4. Small silver mirror sphere — right side
+const Sphere silver_sphere = {
+    .r     = 0.45,
+    .c     = { 2.0, -0.55, 4.5 },
+    .color = { 200, 200, 210 },
+    .s     = 200,
+    .rfl   = 0.85,
+};
+
+// 5. Small teal accent sphere — behind and left
+const Sphere teal_sphere = {
+    .r     = 0.35,
+    .c     = { -1.2, -0.65, 4.0 },
+    .color = { 30, 200, 180 },
+    .s     = 60,
+    .rfl   = 0.2,
+};
+
+// ─── GROUND PLANE (two triangles forming a large quad) ─────
+//
+//   D(-15,-1, 0) ──────── C(15,-1, 0)
+//        |                     |
+//   A(-15,-1,40) ───────  B(15,-1,40)
+//
+// Triangle 1: A, B, C  (front-right half)
+// Triangle 2: A, C, D  (back-left half)
+// Ground is a warm sandy/earthy tone
+
+const Triangle ground1 = {
+    .a     = { -15.0, -1.0, 40.0 },
+    .b     = {  15.0, -1.0, 40.0 },
+    .c     = {  15.0, -1.0,  0.0 },
+    .s     = 5,
+    .rfl   = 0.08,
+    .color = { 180, 140, 90 },
+};
+
+const Triangle ground2 = {
+    .a     = { -15.0, -1.0, 40.0 },
+    .b     = {  15.0, -1.0,  0.0 },
+    .c     = { -15.0, -1.0,  0.0 },
+    .s     = 5,
+    .rfl   = 0.08,
+    .color = { 180, 140, 90 },
+};
+
+// ─── HITTABLES ARRAY ───────────────────────────────────────
+Hittable hittables[] = {
+    { .k = 's', .sph = sun          },
+    { .k = 's', .sph = blue_sphere  },
+    { .k = 's', .sph = red_sphere   },
+    { .k = 's', .sph = silver_sphere},
+    { .k = 's', .sph = teal_sphere  },
+    { .k = 't', .tri = ground1      },
+    { .k = 't', .tri = ground2      },
+};
+int num_hittables = 7;
 
 bool quit()
 {
@@ -111,7 +158,7 @@ int main(void) {
 
             Point v = g_to_viewport(-x+x_offset, -y+y_offset, WINDOW_WIDTH, WINDOW_HEIGHT);
             Point d = sub3(v,o);
-            RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_spheres, spheres,lights);
+            RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_hittables, hittables,lights);
             Uint8 r = (Uint8) rgb.r;
             Uint8 g = (Uint8) rgb.g;
             Uint8 b = (Uint8) rgb.b;
