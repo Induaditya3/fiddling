@@ -77,7 +77,9 @@ RGB adjustColor(RGB rgb, double intensity){
 // assign parameter t a finite value if triangle is intersected otherwise infinite value
 // o is the origin i.e. from where ray originates
 // direction is the direction of the ray
-void instersectTriangle(Point o, Point direction, Triangle tri){
+// tmin and tmax is the minimum and the maximum range of triangle
+// tgb is the array on the storing computed value of t, g and b, t stores INF if intersection doesn't fit the conditions 
+void instersectTriangle(Point o, Point direction, Triangle tri, double tmin, double tmax, double tgb[]){
   // factoring repeated terms so that same thing is computed once
   double a = tri.a.x  - tri.b.x  ;
   double b = tri.a.y  - tri.b.y  ;
@@ -101,9 +103,28 @@ void instersectTriangle(Point o, Point direction, Triangle tri){
   // determining determinants for applying cramer's rule
   double A_det = a*(eihf ) + b*(gfdi) + c*(dheg);
   double t_det = -(f*(akjb) + e*(jcal) + d*(blkc));
-  double gamma_det = i*(akjb) + h*(jcal) + g*(blkc);
-  double beta_det = j*(eihf) + k*(gfdi) + l*(dheg);
-  
+
+  // checking if point on the triangle is within the visible range
+  double t = t_det/A_det;
+   if (t < tmin || t > tmax){
+     tgb[0] = INFINITY;
+     return;
+   }
+   double gamma_det = i*(akjb) + h*(jcal) + g*(blkc);
+   double gamma = gamma_det/A_det;
+   if (gamma < 0 || gamma > 1){
+     tgb[0] = INFINITY;
+     return;
+   }
+   double beta_det = j*(eihf) + k*(gfdi) + l*(dheg);
+   double beta = beta_det/A_det;
+   if (beta < 0 || beta > 1 - gamma){
+     tgb[0] = INFINITY;
+     return;
+   }
+  tgb[0] = t;
+  tgb[1] = gamma;
+  tgb[2] = beta;   
 }
 // return sphere's color if its actually sphere else return background color
 RGB sphereColor(Sphere sphere, double intensity){
@@ -260,9 +281,8 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
 
 
 RGB rtx(Point o, Point d, double tmin, double tmax, int no_lights, int n_sphere, Sphere s_arr[], Light l_arr[]){
-  Sphere* sphere = (Sphere*) malloc(sizeof(Sphere));
-  double intensity = rtx_inner(o, d, tmin, tmax, no_lights, n_sphere, s_arr, l_arr, 3, sphere);
-  RGB rgb = sphereColor(sphere[0], intensity);
-  free(sphere);
+  Sphere sphere;
+  double intensity = rtx_inner(o, d, tmin, tmax, no_lights, n_sphere, s_arr, l_arr, 3, &sphere);
+  RGB rgb = sphereColor(sphere, intensity);
   return rgb;
 }

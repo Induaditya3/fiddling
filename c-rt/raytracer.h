@@ -31,6 +31,14 @@ typedef struct {
   double rfl; // reflectiveness of the sphere - ranges from 0 to 1
 }Sphere;
 
+typedef struct {
+  char k; // kind of hittable object
+  union {
+    Sphere sph; // sphere
+    Triangle tri; // triangle
+  };
+}Hittable;
+
 // Light
 typedef struct {
   char k; // kind of light - 'a' means ambient, 'd' means directional light, 'p' means point source
@@ -70,6 +78,12 @@ Point g_to_viewport(int gx, int gy, int gw, int gh);
 /* Intersection of sphere */
 // returns parameters t1, t2
 double* instersectSphere(Point o, Point d, Sphere s);
+// assign parameter t a finite value if triangle is intersected otherwise infinite value
+// o is the origin i.e. from where ray originates
+// direction is the direction of the ray
+// tmin and tmax is the minimum and the maximum range of triangle
+// tgb is the array on the storing computed value of t, g and b, t stores INF if intersection doesn't fit the conditions 
+void instersectTriangle(Point o, Point direction, Triangle tri, double tmin, double tmax, double tgb[]);
 // closest and visible sphere from the camera and its associated parameter t of intersection of sphere with ray from camera
 // closest_s should be heap allocated by caller
 // closest_t , the parameter associated to closest sphere, it also need to be heap allocated by caller and set to infinity
