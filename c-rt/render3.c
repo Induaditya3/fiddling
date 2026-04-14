@@ -6,65 +6,52 @@
 const int WINDOW_WIDTH = 1080;
 const int WINDOW_HEIGHT = 720;
 
-// === LIGHTS ===
+// ─── LIGHTS ────────────────────────────────────────────────
 Light lights[] = {
-    { .k = 'a', .i = 0.08f, .v = {0.0f, 0.0f, 0.0f} },
-
-    { .k = 'p', .i = 0.9f, .v = {-4.0f, 3.5f, 2.0f} },
-
-    { .k = 'd', .i = 0.35f, .v = {0.3f, -0.8f, 1.0f} },
-
-    { .k = 'p', .i = 0.6f, .v = {2.0f, 4.0f, -1.0f} },
-
-    { .k = 'p', .i = 0.5f, .v = {-2.0f, -1.0f, 3.0f} },
+    { .k = 'a', .i = 0.2,  .v = {0, 0, 0} },           // soft ambient
+    { .k = 'd', .i = 0.8,  .v = {0.5, 1.0, 0.3} },     // sun from upper-right
 };
-int num_lights = sizeof(lights) / sizeof(Light);
+int num_lights = 2;
 
+// ─── HITTABLES ─────────────────────────────────────────────
+Hittable hittables[] = {
 
-// === SPHERES ===
-Sphere spheres[] = {
-    {
-        .c     = {-2.0f, 1.2f, 4.5f},
-        .r     = 0.9f,
-        .color = {139, 0, 0},
-        .s     = 500,
-        .rfl   = 0.7f
-    },
+    // ── GROUND (two triangles = flat quad) ─────────────────
+    // warm grassy green, slight sheen
+    { .k='t', .tri={ .a={-10,-1, 2}, .b={ 10,-1, 2}, .c={ 10,-1,20},
+                     .color={60,120,40}, .s=5, .rfl=0.05 }},
+    { .k='t', .tri={ .a={-10,-1, 2}, .b={ 10,-1,20}, .c={-10,-1,20},
+                     .color={60,120,40}, .s=5, .rfl=0.05 }},
 
-    {
-        .c     = {2.0f, 1.5f, 4.0f},
-        .r     = 0.7f,
-        .color = {50, 200, 50},
-        .s     = 8000,
-        .rfl   = 0.85f
-    },
+    // ── PYRAMID (4 triangular faces) ───────────────────────
+    // apex at (0, 2, 10), base corners at y=-1
+    // front face — lit, warm orange
+    { .k='t', .tri={ .a={ 0, 2,10}, .b={-2,-1, 8}, .c={ 2,-1, 8},
+                     .color={210,120,40}, .s=30, .rfl=0.10 }},
+    // right face — slightly darker
+    { .k='t', .tri={ .a={ 0, 2,10}, .b={ 2,-1, 8}, .c={ 2,-1,12},
+                     .color={170, 90,30}, .s=30, .rfl=0.10 }},
+    // back face — shadowed
+    { .k='t', .tri={ .a={ 0, 2,10}, .b={ 2,-1,12}, .c={-2,-1,12},
+                     .color={130, 70,20}, .s=30, .rfl=0.10 }},
+    // left face
+    { .k='t', .tri={ .a={ 0, 2,10}, .b={-2,-1,12}, .c={-2,-1, 8},
+                     .color={160, 85,25}, .s=30, .rfl=0.10 }},
 
-    {
-        .c     = {0.0f, 2.5f, 6.0f},
-        .r     = 1.2f,
-        .color = {5, 5, 10},
-        .s     = 50,
-        .rfl   = 0.95f
-    },
+    // ── FLAT MIRROR ON THE GROUND (leaning upright) ────────
+    // a single large reflective quad standing to the right
+    { .k='t', .tri={ .a={ 4,-1, 9}, .b={ 6,-1, 9}, .c={ 6, 2, 9},
+                     .color={200,200,220}, .s=150, .rfl=0.80 }},
+    { .k='t', .tri={ .a={ 4,-1, 9}, .b={ 6, 2, 9}, .c={ 4, 2, 9},
+                     .color={200,200,220}, .s=150, .rfl=0.80 }},
 
-    {
-        .c     = {-0.5f, 0.3f, 3.5f},
-        .r     = 0.5f,
-        .color = {180, 100, 80},
-        .s     = 200,
-        .rfl   = 0.2f
-    },
+    // ── SMALL RED FLAG / PENNANT (single triangle) ─────────
+    // sits on top-left, like a flag blowing in the wind
+    { .k='t', .tri={ .a={-3, 2, 8}, .b={-1, 1, 8}, .c={-3, 0, 8},
+                     .color={220,30,30}, .s=10, .rfl=0.02 }},
 
-    {
-        .c     = {0.0f, -5001.0f, 0.0f},
-        .r     = 5000.0f,
-        .color = {20, 15, 18},
-        .s     = 1500,
-        .rfl   = 0.35f
-    },
 };
-int num_spheres = sizeof(spheres) / sizeof(Sphere);
-
+int num_hittables = 9;
 bool quit()
 {
   SDL_Event e;
@@ -116,7 +103,7 @@ int main(void) {
 
             Point v = g_to_viewport(-x+x_offset, -y+y_offset, WINDOW_WIDTH, WINDOW_HEIGHT);
             Point d = sub3(v,o);
-            RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_spheres, spheres,lights);
+            RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_hittables, hittables,lights);
             Uint8 r = (Uint8) rgb.r;
             Uint8 g = (Uint8) rgb.g;
             Uint8 b = (Uint8) rgb.b;
