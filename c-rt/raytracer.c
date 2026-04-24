@@ -221,7 +221,7 @@ void closestHittable(Point o, Point d, double tmin, double tmax, int n_surface, 
     if (surface.k == 't'){
       double tgb[3];
       instersectTriangle(o, d, surface.tri, tmin, tmax, tgb);
-      if (isfinite(tgb[0]) && tgb[0] >= tmin && tgb[1] <= tmax && tgb[0] < c_t[0]){
+      if (isfinite(tgb[0]) && tgb[0] < c_t[0]){
         c_t[0] = tgb[0];
         closest_s[0] = surface;
       }
