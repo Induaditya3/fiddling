@@ -85,8 +85,10 @@ void quad(double a, double b, double c, double roots[]);
 short int clamp(double x);
 // adjust brightness of color
 RGB adjustColor(RGB rgb, double intensity);
-// return sphere's color if its actually sphere else return background color
-RGB surfaceColor(Hittable surface, double intensity);
+// return surface's color if its actually surface else return background color
+// intensity is finite if valid
+// Point p is used for textures
+RGB surfaceColor(Hittable surface, double intensity, Point p);
 /* Coordinate transformataion */
 // transforming coordinate from graphics window to world coordinate (scene)
 // setting width vw and vh of width and height of viewport respectively
@@ -115,8 +117,11 @@ double diffuseI(Point normal, Point l, double i);
 double specularI(Point o, Point p, Point normal, Point l, double i, int s);
 // total light intensity after reflection
 double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], int no_spheres, Hittable s_arr[]);
+// it returns finite illumination intensity if valid intersection
+// also returns surface hit by pointer assignment
+// and Point p where intersection happened which will be useful for texture
 double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int n_sphere, Hittable s_arr[], Light l_arr[], int limit,
-               Hittable *surface);
+               Hittable *surface, Point *p);
 RGB rtx(Point o, Point d, double tmin, double tmax, int no_lights, int n_sphere, Hittable s_arr[], Light l_arr[]);
 
 #endif

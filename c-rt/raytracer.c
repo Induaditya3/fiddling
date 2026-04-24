@@ -153,7 +153,8 @@ void intersectPlane(Point o, Point direction, Plane pl, double tmin, double tmax
   }
 }
 // return surface's color if it intensity is finite else return background color
-RGB surfaceColor(Hittable surface, double intensity){
+// Point p is used for texture
+RGB surfaceColor(Hittable surface, double intensity, Point p){
   if (isinf(intensity)){// rtx_inner uses intensity variable of infinite value as a flag
     return (RGB){0,0,0};
   }
@@ -162,8 +163,15 @@ RGB surfaceColor(Hittable surface, double intensity){
     color = surface.sph.color;
   else if (surface.k == 't')
     color = surface.tri.color;
-  else if (surface.k == 'p')
+  else if (surface.k == 'p'){
     color = surface.pln.color;
+    int odd = (int)p.x + 1;
+    if (p.x < odd && (odd % 2 == 1 || odd % 2 == -1))
+      color = (RGB) {0,0,0};
+    int even = (int)p.z + 1;
+    if (p.z < even && even % 2 == 0)
+      color = (RGB) {12,23,34};
+  }
   return adjustColor(color, intensity);
 }
 /* Coordinate transformataion */
@@ -297,7 +305,7 @@ double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], 
 // its return value intensity having infinite value is used as a flag, this is utilised in surfaceColor
 // it also computes surface which is intersected by the ray from the camera and returns it indirectly thorough pointer assignment
 double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int n_surface, Hittable s_arr[], Light l_arr[], int limit,
-               Hittable *surface){
+               Hittable *surface, Point *p){
   double objintensity, otherintensity;
   objintensity = otherintensity = 0;
   double t;
@@ -305,19 +313,19 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
   closestHittable(o, d, tmin, tmax, n_surface, s_arr, surface, &t);
   // check if surface is valid by checking flag stored in parameter t
   if (isfinite(t)){
-    Point p = add3(o, (scale(t, d)));
+    p[0] = add3(o, (scale(t, d)));
     int shinesss;
     Point normal;
     double rfl;
     if (surface->k == 's'){
-      normal = sub3(p, surface->sph.c);
+      normal = sub3(p[0], surface->sph.c);
       shinesss = surface->sph.s;
       rfl = surface->sph.rfl;
     }
     if (surface->k == 't'){
       normal = cross(
-         sub3(surface->tri.a, p),
-         sub3(surface->tri.b, p)
+         sub3(surface->tri.a, p[0]),
+         sub3(surface->tri.b, p[0])
         );
       shinesss = surface->tri.s;
       rfl = surface->tri.rfl;
@@ -328,7 +336,7 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
       rfl = surface->pln.rfl;
     }
     // find out how much it is illuminated directly i.e. object's intensity
-    objintensity = tli(normal, p, o, shinesss, no_lights, l_arr, n_surface, s_arr);
+    objintensity = tli(normal, p[0], o, shinesss, no_lights, l_arr, n_surface, s_arr);
     // check if object is reflective and recursion limit is reached
     if (shinesss > 0 && limit > 0){
       // find out reflected ray
@@ -338,7 +346,8 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
       );
       // then compute new intensity contributed by other object 
       Hittable newsurface;
-      otherintensity = rtx_inner(p, reflected, EPSILON, INFINITY, no_lights, n_surface, s_arr, l_arr, limit-1, &newsurface);
+      Point newp;
+      otherintensity = rtx_inner(p[0], reflected, EPSILON, INFINITY, no_lights, n_surface, s_arr, l_arr, limit-1, &newsurface, &newp);
       // check if intensity is valid using flag value of inf
       if (isfinite(otherintensity)){
         // if valid then take weighted sum of intensity which will be final intensity
@@ -353,7 +362,8 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
 
 RGB rtx(Point o, Point d, double tmin, double tmax, int no_lights, int n_surface, Hittable s_arr[], Light l_arr[]){
   Hittable surface;
-  double intensity = rtx_inner(o, d, tmin, tmax, no_lights, n_surface, s_arr, l_arr, 3, &surface);
-  RGB rgb = surfaceColor(surface, intensity);
+  Point p;
+  double intensity = rtx_inner(o, d, tmin, tmax, no_lights, n_surface, s_arr, l_arr, 3, &surface,&p);
+  RGB rgb = surfaceColor(surface, intensity,p);
   return rgb;
 }
