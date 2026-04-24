@@ -1,6 +1,6 @@
 #ifndef RAYTRACER_H
 #define RAYTRACER_H
-
+#define EPSILON 1e-5
 #include <math.h>
 #include <stdlib.h>
 /* Various Custom Struct */
@@ -27,6 +27,16 @@ typedef struct {
   RGB color;
 }Triangle;
 
+// plane is specified by normal to plane and distance from origin
+// eq: ax+by+cz+d = 0
+typedef struct {
+  Point n; // normal
+  double d; // distance d from origin
+  RGB color; // color of the plane
+  int s; // shininess of the plane - ranges 0 on up , -ve means not shiny
+  double rfl; // reflectiveness of the plane - ranges from 0 to 1
+}Plane;
+
 // Sphere
 typedef struct {
   double r; // radius
@@ -39,8 +49,9 @@ typedef struct {
 typedef struct {
   char k; // kind of hittable object
   union {
-    Sphere sph; // sphere
-    Triangle tri; // triangle
+    Sphere sph; // sphere, k = 's'
+    Triangle tri; // triangle, k = 't'
+    Plane pln; // plane, k = 'p'
   };
 }Hittable;
 
@@ -92,6 +103,8 @@ void instersectSphere(Point o, Point d, Sphere s, double t[]);
 // tgb is the array on the storing computed value of t, g and b, t stores INF if intersection doesn't fit the conditions 
 void instersectTriangle(Point o, Point direction, Triangle tri, double tmin, double tmax, double tgb[]);
 
+// sets parameter t to inf if intersection if almost parallel or out range [tmin, tmax]
+void intersectPlane(Point o, Point direction, Plane pl, double tmin, double tmax, double *t);
 // closest and visible Hittable surface from the given Point o and its associated parameter t of intersection with ray from camera
 // closest_s should be heap allocated by caller
 // closest_t , the parameter associated to closest sphere, it also need to be heap allocated by caller and set to infinity

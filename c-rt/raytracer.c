@@ -136,12 +136,34 @@ void instersectTriangle(Point o, Point direction, Triangle tri, double tmin, dou
   tgb[1] = gamma;
   tgb[2] = beta;   
 }
-// return sphere's color if its actually sphere else return background color
+
+// sets parameter t to inf if intersection is almost parallel or out range [tmin, tmax]
+// t is valid if it is finite
+void intersectPlane(Point o, Point direction, Plane pl, double tmin, double tmax, double *t){
+  // check if almost parallel intersection
+  double denominator = dot(pl.n,direction);
+  if (fabs(denominator) < EPSILON){
+    t[0] = INFINITY;
+    return;
+  }
+  t[0] =  -(dot(pl.n, o)+pl.d)/denominator;
+  // check the range of parameter t
+  if (t[0] < tmin || t[0] > tmax){
+    t[0] = INFINITY;
+  }
+}
+// return surface's color if it intensity is finite else return background color
 RGB surfaceColor(Hittable surface, double intensity){
   if (isinf(intensity)){// rtx_inner uses intensity variable of infinite value as a flag
     return (RGB){0,0,0};
   }
-  RGB color = surface.k == 's' ? surface.sph.color : surface.tri.color;
+  RGB color;
+  if (surface.k == 's')
+    color = surface.sph.color;
+  else if (surface.k == 't')
+    color = surface.tri.color;
+  else if (surface.k == 'p')
+    color = surface.pln.color;
   return adjustColor(color, intensity);
 }
 /* Coordinate transformataion */
@@ -173,14 +195,15 @@ void instersectSphere(Point o, Point d, Sphere s, double roots[]){
 
 // closest and visible Hittable surface from the given Point o and its associated parameter t of intersection with ray from camera
 // closest_s should be heap allocated by caller
-// closest_t , the parameter associated to closest sphere, it also need to be heap allocated by caller and set to infinity
-void closestHittable(Point o, Point d, double tmin, double tmax, int n_spheres, Hittable s_arr[], Hittable* closest_s, double* c_t){
+// closest_t , the parameter associated to closest surface, it also need to be heap allocated by caller and set to infinity
+void closestHittable(Point o, Point d, double tmin, double tmax, int n_surface, Hittable s_arr[], Hittable* closest_s, double* c_t){
   // initialize the the reference variable for comparision
   Hittable surface;
   c_t[0] = INFINITY; // c_t having infinity value act as flag
   // iterate over all the surfaces check if they intersect and find closest surface based on parameter t
-  for (int i = 0; i < n_spheres; i++){
+  for (int i = 0; i < n_surface; i++){
     surface = s_arr[i];
+    // intersection with sphere
     if (surface.k == 's'){
       double t[2];
       instersectSphere(o, d, surface.sph, t);
@@ -194,13 +217,21 @@ void closestHittable(Point o, Point d, double tmin, double tmax, int n_spheres, 
         closest_s[0] = surface;
       }
     }
-    // do the same for triangle
-    // so we will get closest surface
+    // intersection with triangle
     if (surface.k == 't'){
       double tgb[3];
       instersectTriangle(o, d, surface.tri, tmin, tmax, tgb);
       if (isfinite(tgb[0]) && tgb[0] >= tmin && tgb[1] <= tmax && tgb[0] < c_t[0]){
         c_t[0] = tgb[0];
+        closest_s[0] = surface;
+      }
+    }
+    // intersection with plane
+    if (surface.k == 'p'){
+      double t;
+      intersectPlane(o,d,surface.pln,tmin, tmax,&t);
+      if (isfinite(t) && t < c_t[0]){
+        c_t[0] = t;
         closest_s[0] = surface;
       }
     }
@@ -227,7 +258,7 @@ double specularI(Point o, Point p, Point normal, Point l, double i, int s){
 }
 
 // total light intensity after reflection at point p
-double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], int no_spheres, Hittable s_arr[]){
+double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], int no_surface, Hittable s_arr[]){
   Light light;
   Point l;
   double tmax;
@@ -252,8 +283,8 @@ double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], 
       l = light.v;
       tmax = INFINITY;
     }
-    // check if light is obstructed by some other sphere in the case of point source and directional light
-    closestHittable(p, l, 0.000001, tmax, no_spheres, s_arr, &shadow_s, &shadow_t);
+    // check if light is obstructed by some other surface in the case of point source and directional light
+    closestHittable(p, l, EPSILON, tmax, no_surface, s_arr, &shadow_s, &shadow_t);
     if (isinf(shadow_t)){
       // if not, add that light's contribution 
       c_intensity += specularI(o, p, normal, l, i, s);
@@ -263,16 +294,16 @@ double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], 
   return c_intensity;
 }
 
-// its return value intensity having infinite value is used as a flag, this is utilised in sphereColor
+// its return value intensity having infinite value is used as a flag, this is utilised in surfaceColor
 // it also computes surface which is intersected by the ray from the camera and returns it indirectly thorough pointer assignment
-double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int n_sphere, Hittable s_arr[], Light l_arr[], int limit,
+double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int n_surface, Hittable s_arr[], Light l_arr[], int limit,
                Hittable *surface){
   double objintensity, otherintensity;
   objintensity = otherintensity = 0;
   double t;
-  // find closest sphere from camera in the direction vector d
-  closestHittable(o, d, tmin, tmax, n_sphere, s_arr, surface, &t);
-  // check if sphere is returned by checking flag stored in parameter t
+  // find closest surface from camera in the direction vector d
+  closestHittable(o, d, tmin, tmax, n_surface, s_arr, surface, &t);
+  // check if surface is valid by checking flag stored in parameter t
   if (isfinite(t)){
     Point p = add3(o, (scale(t, d)));
     int shinesss;
@@ -291,8 +322,13 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
       shinesss = surface->tri.s;
       rfl = surface->tri.rfl;
     }
+    if (surface->k == 'p'){
+      normal = surface->pln.n;
+      shinesss = surface->pln.s;
+      rfl = surface->pln.rfl;
+    }
     // find out how much it is illuminated directly i.e. object's intensity
-    objintensity = tli(normal, p, o, shinesss, no_lights, l_arr, n_sphere, s_arr);
+    objintensity = tli(normal, p, o, shinesss, no_lights, l_arr, n_surface, s_arr);
     // check if object is reflective and recursion limit is reached
     if (shinesss > 0 && limit > 0){
       // find out reflected ray
@@ -302,7 +338,7 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
       );
       // then compute new intensity contributed by other object 
       Hittable newsurface;
-      otherintensity = rtx_inner(p, reflected, 0.00001, INFINITY, no_lights, n_sphere, s_arr, l_arr, limit-1, &newsurface);
+      otherintensity = rtx_inner(p, reflected, EPSILON, INFINITY, no_lights, n_surface, s_arr, l_arr, limit-1, &newsurface);
       // check if intensity is valid using flag value of inf
       if (isfinite(otherintensity)){
         // if valid then take weighted sum of intensity which will be final intensity
@@ -315,9 +351,9 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
 }
 
 
-RGB rtx(Point o, Point d, double tmin, double tmax, int no_lights, int n_sphere, Hittable s_arr[], Light l_arr[]){
+RGB rtx(Point o, Point d, double tmin, double tmax, int no_lights, int n_surface, Hittable s_arr[], Light l_arr[]){
   Hittable surface;
-  double intensity = rtx_inner(o, d, tmin, tmax, no_lights, n_sphere, s_arr, l_arr, 3, &surface);
+  double intensity = rtx_inner(o, d, tmin, tmax, no_lights, n_surface, s_arr, l_arr, 3, &surface);
   RGB rgb = surfaceColor(surface, intensity);
   return rgb;
 }

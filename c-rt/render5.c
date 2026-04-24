@@ -1,0 +1,171 @@
+#include <omp.h>
+#include "raytracer.h"
+#include <SDL3/SDL.h>
+
+
+const int WINDOW_WIDTH = 1000;
+const int WINDOW_HEIGHT = 720;
+
+
+
+// Hittable objects array
+Hittable hittables[] = {
+  // Ground plane (XY plane at z = -5)
+  {
+    .k = 'p',
+    .pln = {
+      .n = {0, -0.8, 0.2},           // normal pointing towards camera
+      .d = -5,                  // distance from origin
+      .color = {100, 100, 100}, // gray
+      .s = 20,                  // moderate shininess
+      .rfl = 0.3                // slightly reflective
+    }
+  },
+
+  // Large red sphere (left side)
+  {
+    .k = 's',
+    .sph = {
+      .c = {-3, 0, 5},
+      .r = 1.5,
+      .color = {255, 50, 50},   // red
+      .s = 30,                  // shiny
+      .rfl = 0.5                // reflective
+    }
+  },
+
+  // Blue sphere (center)
+  {
+    .k = 's',
+    .sph = {
+      .c = {0, 0, 8},
+      .r = 2.0,
+      .color = {50, 100, 255},  // blue
+      .s = 25,
+      .rfl = 0.4
+    }
+  },
+
+  // Green sphere (right side)
+  {
+    .k = 's',
+    .sph = {
+      .c = {3, 2, 6},
+      .r = 1.2,
+      .color = {50, 200, 50},   // green
+      .s = 15,
+      .rfl = 0.2
+    }
+  },
+
+  // Triangle (reflective, tilted)
+  {
+    .k = 't',
+    .tri = {
+      .a = {-2, -2, 4},
+      .b = {2, -2, 4},
+      .c = {0, 2, 6},
+      .color = {200, 200, 50},  // yellow
+      .s = 20,
+      .rfl = 0.35
+    }
+  }
+};
+
+// Lights array
+Light lights[] = {
+  // Ambient light (provides base illumination)
+  {
+    .k = 'a',
+    .i = 0.3,                   // 30% ambient
+    .v = {0, 0, 0}              // unused for ambient
+  },
+
+  // Directional light (from upper right, behind)
+  {
+    .k = 'd',
+    .i = 0.5,                   // 50% of total light
+    .v = {1, 1, -1}             // direction (will need normalization in your code)
+  },
+
+  // Point light source (above center)
+  {
+    .k = 'p',
+    .i = 0.2,                   // 20% of total light
+    .v = {0, 0, 10}             // position in 3D space
+  }
+};
+int num_lights = 3;
+int num_hittables = 5;
+
+bool quit()
+{
+  SDL_Event e;
+  if (SDL_PollEvent(&e))
+  {
+    if (e.type == SDL_EVENT_QUIT)
+    {
+      return false;
+    }
+    if (e.type == SDL_EVENT_KEY_UP && e.key.key == SDLK_ESCAPE)
+    {
+      return false;
+    }
+  }
+
+  SDL_Delay(1);
+  return true;
+}
+// Helper: get pointer to a pixel at (x, y)
+static inline Uint8* get_pixel_ptr(SDL_Surface *surface, int x, int y) {
+    int bpp = SDL_BYTESPERPIXEL(surface->format);
+    return (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
+}
+
+// Set a pixel at (x, y) to an RGB color
+void set_pixel(SDL_Surface *surface, int x, int y, Uint8 r, Uint8 g, Uint8 b) {
+    const SDL_PixelFormatDetails *fmt = SDL_GetPixelFormatDetails(surface->format);
+    Uint32 color = SDL_MapRGB(fmt, NULL, r, g, b);
+    Uint8 *pixel = get_pixel_ptr(surface, x, y);
+    int bpp = SDL_BYTESPERPIXEL(surface->format);
+    SDL_memcpy(pixel, &color, bpp); // safe for any bpp
+}
+
+int main(void) {
+    SDL_Init(SDL_INIT_VIDEO);
+
+    SDL_Window *window = SDL_CreateWindow("Ray Tracer By <Name>", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    SDL_Surface *surface = SDL_GetWindowSurface(window);
+
+    if (SDL_MUSTLOCK(surface)) SDL_LockSurface(surface);
+
+    int x_offset = (int)WINDOW_WIDTH/2;
+    int y_offset = (int)WINDOW_HEIGHT/2;
+    Point o = (Point) {0, 0, 0};
+    // Iterate over every pixel
+    #pragma omp parallel for schedule(dynamic, 4)
+    for (int y = 0; y < surface->h; y++) {
+        for (int x = 0; x < surface->w; x++) {
+
+            Point v = g_to_viewport(-x+x_offset, -y+y_offset, WINDOW_WIDTH, WINDOW_HEIGHT);
+            Point d = sub3(v,o);
+            RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_hittables, hittables,lights);
+            Uint8 r = (Uint8) rgb.r;
+            Uint8 g = (Uint8) rgb.g;
+            Uint8 b = (Uint8) rgb.b;
+            set_pixel(surface, x, y, r, g, b);
+        }
+    }
+
+    if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface);
+
+    SDL_UpdateWindowSurface(window);
+    while (quit());
+
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return 0;
+}
+
+
+
