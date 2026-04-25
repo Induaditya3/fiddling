@@ -20,12 +20,12 @@ typedef struct {
 /* Adding texture field to every hittable object which will hold function pointer */
 typedef struct {
   Point a, b, c; // coordinates of location of vertices
-  // Point n; // normal
-  // double gama, beta; // barycentric coordinate at a intersection point
+  Point n; // normal
+  double gamma, beta; // barycentric coordinate at a intersection point - gets updated with each call of closestHittable
   int s; // shininess
   double rfl;
   RGB color;
-  RGB (*pattern)(Point, RGB); // texture function pointer
+  RGB (*pattern)(Point, RGB, double[]); // texture function pointer
 }Triangle;
 
 // plane is specified by normal to plane and distance from origin

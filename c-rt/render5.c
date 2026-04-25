@@ -6,12 +6,25 @@
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 720;
 
+// for doing color gradient of triangle using barycenteric coordinate
+// gb[] is used where gb[0] is gamma, gb[1] is beta
+RGB gradient_tri(Point p, RGB color, double gb[]){
+  RGB red = (RGB){.r = 254};
+  RGB green = (RGB){.g = 254};
+  RGB blue = (RGB){.b = 254};
+  // doing linear interpolation using alpha, beta and gamma
+  color.r = (1-gb[0] -gb[1])*red.r + gb[0]*green.r + gb[1]*blue.r;
+  color.g = (1-gb[0] -gb[1])*red.g + gb[0]*green.g + gb[1]*blue.g;
+  color.b = (1-gb[0] -gb[1])*red.b + gb[0]*green.b + gb[1]*blue.b;
+  return color;  
+}
 
 RGB checkered(Point p, RGB color){
   int odd  = (int)p.x + 1;
+  int even = (int)p.z + 1;
   if (p.x < odd && (odd % 2 == 1 || odd %2 == -1))
     color = (RGB){.r = color.r - 100, .g = color.g, .b = color.b + 100};
-  else
+  else if (p.z < even && even % 2 == 0)
     color = (RGB){.r = color.r + 100, .g = color.g, .b = color.b - 100};
   return color;
 }
@@ -79,7 +92,7 @@ Hittable hittables[] = {
       .color = {200, 200, 50},  // yellow
       .s = 20,
       .rfl = 0.35,
-      .pattern = checkered
+      .pattern = gradient_tri
     }
   }
 };

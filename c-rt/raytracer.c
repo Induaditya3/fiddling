@@ -169,7 +169,7 @@ RGB surfaceColor(Hittable surface, double intensity, Point p){
     if (surface.tri.pattern == NULL)
       color = surface.tri.color;
     else
-      color = surface.tri.pattern(p, surface.tri.color);
+      color = surface.tri.pattern(p,surface.tri.color,(double[]){surface.tri.gamma, surface.tri.beta});
   }
   if (surface.k == 'p'){
     if (surface.pln.pattern == NULL)
@@ -236,6 +236,8 @@ void closestHittable(Point o, Point d, double tmin, double tmax, int n_surface, 
       instersectTriangle(o, d, surface.tri, tmin, tmax, tgb);
       if (isfinite(tgb[0]) && tgb[0] < c_t[0]){
         c_t[0] = tgb[0];
+        surface.tri.gamma = tgb[1];
+        surface.tri.gamma = tgb[2];
         closest_s[0] = surface;
       }
     }
@@ -328,10 +330,16 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
       rfl = surface->sph.rfl;
     }
     if (surface->k == 't'){
-      normal = cross(
-         sub3(surface->tri.a, p[0]),
-         sub3(surface->tri.b, p[0])
-        );
+      // check if normal of triangle is not computed then compute it and update normal field of the triangle
+      if (surface->tri.n.x == 0 && surface->tri.n.y == 0 && surface->tri.n.z == 0){
+        normal = cross(
+           sub3(surface->tri.a, p[0]),
+           sub3(surface->tri.b, p[0])
+          );
+        surface->tri.n = normal;
+      }
+      // else use it
+      normal = surface->tri.n;
       shinesss = surface->tri.s;
       rfl = surface->tri.rfl;
     }
