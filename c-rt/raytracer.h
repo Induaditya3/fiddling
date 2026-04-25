@@ -17,7 +17,7 @@ typedef struct {
 }RGB;
 
 /* Restructuring code for supporting triangle */
-
+/* Adding texture field to every hittable object which will hold function pointer */
 typedef struct {
   Point a, b, c; // coordinates of location of vertices
   // Point n; // normal
@@ -25,6 +25,7 @@ typedef struct {
   int s; // shininess
   double rfl;
   RGB color;
+  RGB (*pattern)(Point, RGB); // texture function pointer
 }Triangle;
 
 // plane is specified by normal to plane and distance from origin
@@ -35,6 +36,7 @@ typedef struct {
   RGB color; // color of the plane
   int s; // shininess of the plane - ranges 0 on up , -ve means not shiny
   double rfl; // reflectiveness of the plane - ranges from 0 to 1
+  RGB (*pattern)(Point, RGB); // texture function pointer
 }Plane;
 
 // Sphere
@@ -44,6 +46,7 @@ typedef struct {
   RGB color; // color of the sphere
   int s; // shininess of the sphere - ranges 0 on up , -ve means not shiny
   double rfl; // reflectiveness of the sphere - ranges from 0 to 1
+  RGB (*pattern)(Point, RGB); // texture function pointer
 }Sphere;
 
 typedef struct {

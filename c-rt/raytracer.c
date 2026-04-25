@@ -159,18 +159,23 @@ RGB surfaceColor(Hittable surface, double intensity, Point p){
     return (RGB){0,0,0};
   }
   RGB color;
-  if (surface.k == 's')
-    color = surface.sph.color;
-  else if (surface.k == 't')
-    color = surface.tri.color;
-  else if (surface.k == 'p'){
-    color = surface.pln.color;
-    int odd = (int)p.x + 1;
-    if (p.x < odd && (odd % 2 == 1 || odd % 2 == -1))
-      color = (RGB) {0,0,0};
-    int even = (int)p.z + 1;
-    if (p.z < even && even % 2 == 0)
-      color = (RGB) {12,23,34};
+  if (surface.k == 's'){
+    if (surface.sph.pattern == NULL)
+      color = surface.sph.color;
+    else
+      color = surface.sph.pattern(p, surface.sph.color);
+  }
+  else if (surface.k == 't'){
+    if (surface.tri.pattern == NULL)
+      color = surface.tri.color;
+    else
+      color = surface.tri.pattern(p, surface.tri.color);
+  }
+  if (surface.k == 'p'){
+    if (surface.pln.pattern == NULL)
+      color = surface.pln.color;
+    else
+      color = surface.pln.pattern(p, surface.pln.color);
   }
   return adjustColor(color, intensity);
 }

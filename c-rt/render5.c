@@ -7,7 +7,14 @@ const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 720;
 
 
-
+RGB checkered(Point p, RGB color){
+  int odd  = (int)p.x + 1;
+  if (p.x < odd && (odd % 2 == 1 || odd %2 == -1))
+    color = (RGB){.r = color.r - 100, .g = color.g, .b = color.b + 100};
+  else
+    color = (RGB){.r = color.r + 100, .g = color.g, .b = color.b - 100};
+  return color;
+}
 // Hittable objects array
 Hittable hittables[] = {
   // Ground plane (XY plane at z = -5)
@@ -18,7 +25,8 @@ Hittable hittables[] = {
       .d = -5,                  // distance from origin
       .color = {100, 100, 100}, // gray
       .s = 20,                  // moderate shininess
-      .rfl = 0.3                // slightly reflective
+      .rfl = 0.3,                // slightly reflective
+      .pattern = checkered
     }
   },
 
@@ -30,7 +38,8 @@ Hittable hittables[] = {
       .r = 1.5,
       .color = {255, 50, 50},   // red
       .s = 30,                  // shiny
-      .rfl = 0.5                // reflective
+      .rfl = 0.5,                // reflective
+      .pattern = checkered
     }
   },
 
@@ -42,7 +51,8 @@ Hittable hittables[] = {
       .r = 2.0,
       .color = {50, 100, 255},  // blue
       .s = 25,
-      .rfl = 0.4
+      .rfl = 0.4,
+      .pattern = checkered      
     }
   },
 
@@ -54,7 +64,8 @@ Hittable hittables[] = {
       .r = 1.2,
       .color = {50, 200, 50},   // green
       .s = 15,
-      .rfl = 0.2
+      .rfl = 0.2,
+      .pattern = checkered
     }
   },
 
@@ -67,7 +78,8 @@ Hittable hittables[] = {
       .c = {0, 2, 6},
       .color = {200, 200, 50},  // yellow
       .s = 20,
-      .rfl = 0.35
+      .rfl = 0.35,
+      .pattern = checkered
     }
   }
 };
