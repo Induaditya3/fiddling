@@ -237,7 +237,7 @@ void closestHittable(Point o, Point d, double tmin, double tmax, int n_surface, 
       if (isfinite(tgb[0]) && tgb[0] < c_t[0]){
         c_t[0] = tgb[0];
         surface.tri.gamma = tgb[1];
-        surface.tri.gamma = tgb[2];
+        surface.tri.beta = tgb[2];
         closest_s[0] = surface;
       }
     }
