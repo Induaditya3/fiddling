@@ -20,12 +20,16 @@ RGB gradient_tri(Point p, RGB color, double gb[]){
 }
 
 RGB checkered(Point p, RGB color){
-  int odd  = (int)p.x + 1;
-  int even = (int)p.z + 1;
-  if (p.x < odd && (odd % 2 == 1 || odd %2 == -1))
-    color = (RGB){.r = color.r - 100, .g = color.g, .b = color.b + 100};
-  else if (p.z < even && even % 2 == 0)
-    color = (RGB){.r = color.r + 100, .g = color.g, .b = color.b - 100};
+  int oddx  = (int)p.x + 1;
+  int oddz  = (int)p.z + 1;
+  int evenx = (int)p.x + 1;
+  int evenz = (int)p.z + 1;
+  if (
+      ((p.x < oddx && (oddx % 2 == 1 || oddx %2 == -1)) && (p.z < oddz && (oddz % 2 == 1 || oddz %2 == -1))) ||
+      ( (p.x < evenx && evenx % 2 == 0) && (p.z < evenz && evenz % 2 == 0)) )
+    color = (RGB){.r = 0, .g = 0, .b = 0};
+  else
+    color = (RGB){.r = 255, .g = 255, .b = 255};
   return color;
 }
 // Hittable objects array
