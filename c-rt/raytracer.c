@@ -299,7 +299,9 @@ double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], 
       tmax = INFINITY;
     }
     // check if light is obstructed by some other surface in the case of point source and directional light
-    closestHittable(p, l, EPSILON, tmax, no_surface, s_arr, &shadow_s, &shadow_t);
+    closestHittable(
+      add3(p, scale(EPSILON, normal))
+      , l, EPSILON, tmax, no_surface, s_arr, &shadow_s, &shadow_t);
     if (isinf(shadow_t)){
       // if not, add that light's contribution 
       c_intensity += specularI(o, p, normal, l, light.i, s);

@@ -6,6 +6,12 @@
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 720;
 
+RGB ring(Point p, RGB color){
+  if ((int)(sqrt(p.x*p.x + p.z*p.z)) % 2 == 0){
+    color = (RGB){.r = 255, .g = 255, .b = 255};
+  }
+  return color;
+}
 // for doing color gradient of triangle using barycenteric coordinate
 // gb[] is used where gb[0] is gamma, gb[1] is beta
 RGB gradient_tri(Point p, RGB color, double gb[]){
@@ -51,12 +57,12 @@ Hittable hittables[] = {
   {
     .k = 's',
     .sph = {
-      .c = {-3, 0, 5},
-      .r = 1.5,
+      .c = {-3, 36, 100},
+      .r = 35,
       .color = {255, 50, 50},   // red
       .s = 30,                  // shiny
-      .rfl = 0.5,                // reflective
-      .pattern = checkered
+      .rfl = 0.0,                // reflective
+      .pattern = ring 
     }
   },
 
@@ -69,7 +75,7 @@ Hittable hittables[] = {
       .color = {50, 100, 255},  // blue
       .s = 25,
       .rfl = 0.4,
-      .pattern = checkered      
+      .pattern = NULL 
     }
   },
 
@@ -92,7 +98,7 @@ Hittable hittables[] = {
     .tri = {
       .a = {-2, -2, 4},
       .b = {2, -2, 4},
-      .c = {0, 2, 6},
+      .c = {0, 2, 9},
       .color = {200, 200, 50},  // yellow
       .s = 20,
       .rfl = 0.35,
@@ -163,7 +169,7 @@ void set_pixel(SDL_Surface *surface, int x, int y, Uint8 r, Uint8 g, Uint8 b) {
 int main(void) {
     SDL_Init(SDL_INIT_VIDEO);
 
-    SDL_Window *window = SDL_CreateWindow("Ray Tracer By <Name>", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    SDL_Window *window = SDL_CreateWindow("c-rt", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     SDL_Surface *surface = SDL_GetWindowSurface(window);
 
     if (SDL_MUSTLOCK(surface)) SDL_LockSurface(surface);
