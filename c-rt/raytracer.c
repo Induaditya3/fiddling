@@ -302,8 +302,8 @@ double tli(Point normal, Point p, Point o, int s, int no_lights, Light l_arr[], 
     closestHittable(p, l, EPSILON, tmax, no_surface, s_arr, &shadow_s, &shadow_t);
     if (isinf(shadow_t)){
       // if not, add that light's contribution 
-      c_intensity += specularI(o, p, normal, l, i, s);
-      c_intensity += diffuseI(normal, l, i);
+      c_intensity += specularI(o, p, normal, l, light.i, s);
+      c_intensity += diffuseI(normal, l, light.i);
     }
   }
   return c_intensity;
@@ -333,8 +333,8 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
       // check if normal of triangle is not computed then compute it and update normal field of the triangle
       if (surface->tri.n.x == 0 && surface->tri.n.y == 0 && surface->tri.n.z == 0){
         normal = cross(
-           sub3(surface->tri.a, p[0]),
-           sub3(surface->tri.b, p[0])
+           sub3(surface->tri.a, surface->tri.c),
+           sub3(surface->tri.b, surface->tri.c)
           );
         surface->tri.n = normal;
       }
@@ -348,13 +348,15 @@ double rtx_inner(Point o, Point d, double tmin, double tmax, int no_lights, int 
       shinesss = surface->pln.s;
       rfl = surface->pln.rfl;
     }
+    // normalize the vector i.e. make it unit vector
+    normal = scale(1 / norm(normal), normal);
     // find out how much it is illuminated directly i.e. object's intensity
     objintensity = tli(normal, p[0], o, shinesss, no_lights, l_arr, n_surface, s_arr);
     // check if object is reflective and recursion limit is reached
     if (shinesss > 0 && limit > 0){
       // find out reflected ray
       Point reflected = reflectedRay(
-        scale(1 / norm(normal), normal),
+        normal,
         scale(-1, d)
       );
       // then compute new intensity contributed by other object 
