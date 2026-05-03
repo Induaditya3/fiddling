@@ -1,12 +1,14 @@
+#include <math.h>
 #include <omp.h>
 #include "raytracer.h"
 #include <SDL3/SDL.h>
+#include <stdlib.h>
 
 
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 720;
 
-RGB ring(Point p, RGB color){
+RGB ring_sph(Point p, RGB color){
   if ((int)(sqrt(p.x*p.x + p.z*p.z)) % 2 == 0){
     color = (RGB){.r = 255, .g = 255, .b = 255};
   }
@@ -25,14 +27,50 @@ RGB gradient_tri(Point p, RGB color, double gb[]){
   return color;  
 }
 
+
+RGB zebra_sph(Point p, RGB color){
+  // double theta = acos(p.z/norm(p));
+  // double psi = atan2(p.y, p.x);
+  // getting u, v coordinates where u,v varies [0, 1]
+  double u = (M_PI + atan2(p.y, p.x))/(2*M_PI);
+  double v = (M_PI - acos(p.z/fabs(p.x)))/M_PI;
+  // scale it by factor
+  double factor = 10;
+  u *= factor;
+  v *= factor;
+
+  
+  int nu = (int)u + 1;
+  int nv = (int)v + 1;
+  if ((nv+nu) % 2 == 0)
+    return (RGB){.r = 5, .g = 5, .b = 5};
+  else
+    return (RGB){.r = 255, .g = 255, .b = 255};
+}
+// checker for sphere using spherical coordinates
+RGB checkered_sph(Point p, RGB color){
+  // double theta = acos(p.z/norm(p));
+  // double psi = atan2(p.y, p.x);
+  // getting u, v coordinates where u,v varies [0, 1]
+  double u = (M_PI + atan2(p.y, p.x))/(2*M_PI);
+  double v = (M_PI - acos(p.z/fabs(p.x)))/M_PI;
+  // scale it by factor
+  double factor = 12;
+  u *= factor;
+  v *= factor;
+
+  int nu = (int)u + 1;
+  int nv = (int)v + 1;
+
+  if ( ((int)(factor*sqrt(p.x*p.x + p.z*p.z)) + nv + nu) % 2 == 0)
+    return (RGB){.r = 5, .g = 5, .b = 5};
+  else
+    return (RGB){.r = 255, .g = 255, .b = 255};
+}
 RGB checkered(Point p, RGB color){
-  int oddx  = (int)p.x + 1;
-  int oddz  = (int)p.z + 1;
-  int evenx = (int)p.x + 1;
-  int evenz = (int)p.z + 1;
-  if (
-      ((p.x < oddx && (oddx % 2 == 1 || oddx %2 == -1)) && (p.z < oddz && (oddz % 2 == 1 || oddz %2 == -1))) ||
-      ( (p.x < evenx && evenx % 2 == 0) && (p.z < evenz && evenz % 2 == 0)) )
+  int x  = (int)p.x + 1;
+  int z  = (int)p.z + 1;
+  if ( (abs(x) % 2 == 1 && abs(z) % 2 == 1) || ( x % 2 == 0 && z % 2 == 0) )
     color = (RGB){.r = 0, .g = 0, .b = 0};
   else
     color = (RGB){.r = 255, .g = 255, .b = 255};
@@ -62,7 +100,7 @@ Hittable hittables[] = {
       .color = {255, 50, 50},   // red
       .s = 30,                  // shiny
       .rfl = 0.0,                // reflective
-      .pattern = ring 
+      .pattern = ring_sph  
     }
   },
 
@@ -75,7 +113,7 @@ Hittable hittables[] = {
       .color = {50, 100, 255},  // blue
       .s = 25,
       .rfl = 0.4,
-      .pattern = NULL 
+      .pattern = checkered_sph  
     }
   },
 
@@ -96,9 +134,9 @@ Hittable hittables[] = {
   {
     .k = 't',
     .tri = {
-      .a = {-2, -2, 4},
+      .a = {4, -2, 8},
       .b = {2, -2, 4},
-      .c = {0, 2, 9},
+      .c = {0, 2, 5},
       .color = {200, 200, 50},  // yellow
       .s = 20,
       .rfl = 0.35,
