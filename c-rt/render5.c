@@ -70,7 +70,7 @@ RGB checkered_sph(Point p, RGB color){
 RGB checkered(Point p, RGB color){
   int x  = (int)p.x + 1;
   int z  = (int)p.z + 1;
-  if ( (abs(x) % 2 == 1 && abs(z) % 2 == 1) || ( x % 2 == 0 && z % 2 == 0) )
+  if ((x+z)% 2)
     color = (RGB){.r = 0, .g = 0, .b = 0};
   else
     color = (RGB){.r = 255, .g = 255, .b = 255};
