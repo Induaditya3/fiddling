@@ -169,7 +169,7 @@ int main(void) {
         for (int x = 0; x < surface->w; x++) {
             // Example: red gradient
 
-            Point v = g_to_viewport(-x+x_offset, -y+y_offset, WINDOW_WIDTH, WINDOW_HEIGHT);
+            Point v = g_to_viewport(x-x_offset, -y+y_offset, WINDOW_WIDTH, WINDOW_HEIGHT);
             Point d = sub3(v,o);
             RGB rgb = rtx(o, d, 1, INFINITY, num_lights, num_hittables, hittables,lights);
             Uint8 r = (Uint8) rgb.r;
