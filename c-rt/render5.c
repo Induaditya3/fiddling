@@ -2,14 +2,14 @@
 #include <omp.h>
 #include "raytracer.h"
 #include <SDL3/SDL.h>
-#include <stdlib.h>
 
 
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 720;
 
 RGB ring_sph(Point p, RGB color){
-  if ((int)(sqrt(p.x*p.x + p.z*p.z)) % 2 == 0){
+  double factor = 100;
+  if ((int)(factor*sqrt(p.x*p.x + p.z*p.z)/norm(p)) % 2 == 0){
     color = (RGB){.r = 255, .g = 255, .b = 255};
   }
   return color;
@@ -100,7 +100,7 @@ Hittable hittables[] = {
       .color = {255, 50, 50},   // red
       .s = 30,                  // shiny
       .rfl = 0.0,                // reflective
-      .pattern = ring_sph  
+      .pattern = zebra_sph 
     }
   },
 
@@ -126,7 +126,7 @@ Hittable hittables[] = {
       .color = {50, 200, 50},   // green
       .s = 15,
       .rfl = 0.2,
-      .pattern = checkered
+      .pattern = ring_sph
     }
   },
 
